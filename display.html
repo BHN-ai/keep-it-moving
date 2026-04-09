@@ -44,46 +44,45 @@
   .brand-line.v2 { right: 12%; top: 0; bottom: 0; width: 1px; background: linear-gradient(180deg, transparent, var(--petrol), transparent); }
 
   /* Siemens logo */
-  .sie-logo { height: 18px; opacity: 0.7; }
-  .sie-logo-large { height: 22px; opacity: 0.8; }
+  .sie-logo { height: 54px; opacity: 0.85; }
+  .sie-logo-large { height: 66px; opacity: 0.9; }
 
   /* Intro */
   #intro h1 { font-size: clamp(46px, 7vw, 80px); font-weight: 300; letter-spacing: -2px; line-height: 1.05; text-align: center; }
   #intro h1 span { font-weight: 700; color: var(--accent); text-shadow: 0 0 50px rgba(0,255,185,0.2); }
-  #intro .sub { font-size: clamp(14px, 2vw, 17px); color: var(--mid); margin-top: 18px; text-align: center; line-height: 1.7; max-width: 380px; }
-  .qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .qr-label { font-size: 11px; font-family: var(--mono); color: var(--dim); letter-spacing: 2.5px; text-transform: uppercase; }
-  .hint-text { font-size: 11px; font-family: var(--mono); color: var(--dim); letter-spacing: 1px; }
+  #intro .sub { font-size: clamp(18px, 2.5vw, 24px); color: var(--white); opacity: 0.7; margin-top: 20px; text-align: center; line-height: 1.7; max-width: 480px; }
+  .qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .qr-label { font-size: 16px; font-family: var(--mono); color: var(--white); opacity: 0.5; letter-spacing: 2.5px; text-transform: uppercase; }
+  .hint-text { font-size: 14px; font-family: var(--mono); color: var(--white); opacity: 0.4; letter-spacing: 1px; }
 
   /* Game */
   #game { cursor: pointer; }
-  .timer-bar { height: 3px; background: var(--bgSub); }
+  .timer-bar { height: 4px; background: var(--bgSub); }
   .timer-fill { height: 100%; border-radius: 0 2px 2px 0; transition: width 0.08s linear, background 0.5s; }
-  .game-hud { display: flex; justify-content: space-between; align-items: center; padding: 14px 28px 0; }
-  .game-hud .title { font-size: 14px; font-weight: 500; letter-spacing: -0.3px; }
+  .game-hud { display: flex; justify-content: space-between; align-items: center; padding: 16px 32px 0; }
+  .game-hud .title { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
   .game-hud .title span { color: var(--accent); font-weight: 700; }
-  .game-hud .timer { font-family: var(--mono); font-size: 36px; font-weight: 600; line-height: 1; transition: color 0.4s; }
   .canvas-wrap { flex: 1; position: relative; }
   .canvas-wrap canvas { width: 100%; height: 100%; display: block; }
-  .game-stats { display: flex; justify-content: space-between; padding: 0 28px 6px; font-size: 12px; font-family: var(--mono); color: var(--dim); }
-  .progress-track { height: 4px; margin: 0 28px; border-radius: 2px; background: rgba(42,63,85,0.25); margin-bottom: 4px; }
-  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.12s ease-out; }
-  .tap-prompt { text-align: center; padding: 16px 24px 32px; }
-  .tap-prompt span { font-size: clamp(20px, 4vw, 30px); font-weight: 300; color: var(--mid); animation: breathe 1.2s ease-in-out infinite; }
+  .game-stats { display: flex; justify-content: center; padding: 0 28px 6px; font-size: 16px; font-family: var(--mono); color: var(--white); opacity: 0.5; }
+  .progress-track { height: 5px; margin: 0 28px; border-radius: 3px; background: rgba(42,63,85,0.25); margin-bottom: 4px; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.12s ease-out; }
+  .tap-prompt { text-align: center; padding: 16px 24px 36px; }
+  .tap-prompt span { font-size: clamp(24px, 4vw, 36px); font-weight: 300; color: var(--white); opacity: 0.6; animation: breathe 1.2s ease-in-out infinite; }
 
   /* Results */
   #results .glow-bg { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 40%, rgba(0,255,185,0.06) 0%, transparent 70%); }
-  .result-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 28px; }
-  .result-icon.won { border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(0,255,185,0.15); }
-  .result-icon.lost { border: 2px solid var(--mid); }
-  .result-title { font-size: clamp(30px, 5vw, 52px); font-weight: 700; text-align: center; line-height: 1.15; margin-bottom: 6px; }
+  .result-icon { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+  .result-icon.won { border: 2.5px solid var(--accent); box-shadow: 0 0 40px rgba(0,255,185,0.15); }
+  .result-icon.lost { border: 2.5px solid var(--mid); }
+  .result-title { font-size: clamp(36px, 6vw, 64px); font-weight: 700; text-align: center; line-height: 1.15; margin-bottom: 8px; }
   .result-title.won { color: var(--accent); text-shadow: 0 0 40px rgba(0,255,185,0.25); }
   .result-title.lost { color: var(--white); }
-  .result-sub { font-size: 14px; color: var(--mid); font-family: var(--mono); margin-bottom: 44px; }
-  .stat-row { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 0; border-bottom: 1px solid rgba(42,63,85,0.12); }
-  .stat-label { font-size: 13px; color: var(--mid); font-family: var(--mono); letter-spacing: 0.8px; text-transform: uppercase; }
-  .stat-value { font-size: 24px; font-weight: 600; font-family: var(--mono); }
-  .stat-unit { font-size: 12px; color: var(--mid); font-weight: 400; margin-left: 3px; }
+  .result-sub { font-size: 20px; color: var(--white); opacity: 0.6; font-family: var(--mono); margin-bottom: 48px; }
+  .stat-row { display: flex; justify-content: space-between; align-items: baseline; padding: 20px 0; border-bottom: 1px solid rgba(42,63,85,0.15); }
+  .stat-label { font-size: 18px; color: var(--white); opacity: 0.6; font-family: var(--mono); letter-spacing: 0.8px; text-transform: uppercase; }
+  .stat-value { font-size: 32px; font-weight: 600; font-family: var(--mono); }
+  .stat-unit { font-size: 16px; color: var(--white); opacity: 0.5; font-weight: 400; margin-left: 4px; }
 
   /* Celebration overlay */
   #celebration { position: fixed; inset: 0; pointer-events: none; z-index: 80; }
@@ -97,7 +96,7 @@
   .conn-dot.off { background: var(--dim); }
 
   /* Bottom brand bar */
-  .brand-bar { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; pointer-events: none; z-index: 5; }
+  .brand-bar { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; align-items: center; padding: 24px 32px; pointer-events: none; z-index: 5; }
   .brand-bar .divider { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0,255,185,0.08), transparent); margin: 0 16px; }
 
   @keyframes breathe {
@@ -150,18 +149,18 @@
     </div>
   </div>
   <div class="brand-bar" style="justify-content:center">
-    <svg class="sie-logo" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="rgba(255,255,255,0.3)" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="rgba(255,255,255,0.3)" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="rgba(255,255,255,0.3)" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="rgba(255,255,255,0.3)" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="rgba(255,255,255,0.3)" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="rgba(255,255,255,0.3)" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="rgba(255,255,255,0.3)" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
+    <svg class="sie-logo" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
   </div>
 </div>
 <div class="screen hidden" id="game">
   <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
   <div class="game-hud">
     <div class="title">Keep It <span>Moving</span></div>
-    <span id="pctText" style="font-size:12px;font-family:var(--mono);color:var(--dim)">0%</span>
+    <span id="pctText" style="font-size:18px;font-family:var(--mono);color:var(--white);opacity:0.5">0%</span>
   </div>
   <div style="text-align:center;padding:12px 0 0">
-    <div id="timerText" style="font-family:var(--mono);font-size:clamp(56px,10vw,80px);font-weight:600;line-height:1;transition:color 0.4s;color:var(--white)">13</div>
-    <div style="font-size:11px;font-family:var(--mono);color:var(--dim);letter-spacing:2px;margin-top:4px">SEKUNDER IGJEN</div>
+    <div id="timerText" style="font-family:var(--mono);font-size:clamp(64px,12vw,96px);font-weight:600;line-height:1;transition:color 0.4s;color:var(--white)">13</div>
+    <div style="font-size:16px;font-family:var(--mono);color:var(--white);opacity:0.45;letter-spacing:3px;margin-top:6px">SEKUNDER IGJEN</div>
   </div>
   <div class="canvas-wrap"><canvas id="railCanvas"></canvas></div>
   <div class="game-stats">
@@ -169,8 +168,8 @@
   </div>
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   <div class="tap-prompt"><span>Trykk hvor som helst</span></div>
-  <div style="position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:5">
-    <svg style="height:16px;opacity:0.35" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
+  <div style="position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:5">
+    <svg style="height:48px;opacity:0.5" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
   </div>
 </div>
 
@@ -183,14 +182,14 @@
     <div class="result-icon" id="resultIcon"></div>
     <div class="result-title" id="resultTitle"></div>
     <div class="result-sub" id="resultSub"></div>
-    <div style="width:min(380px,82vw)" id="statsWrap"></div>
+    <div style="width:min(480px,88vw)" id="statsWrap"></div>
     <div style="margin-top:44px" class="qr-wrap">
       <canvas id="qrResults" width="360" height="360" style="width:360px;height:360px;border-radius:14px;background:#000028"></canvas>
       <span class="qr-label">Skann for å spille igjen</span>
     </div>
   </div>
   <div class="brand-bar" style="justify-content:center">
-    <svg class="sie-logo" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="rgba(255,255,255,0.25)" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="rgba(255,255,255,0.25)" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="rgba(255,255,255,0.25)" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="rgba(255,255,255,0.25)" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="rgba(255,255,255,0.25)" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="rgba(255,255,255,0.25)" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="rgba(255,255,255,0.25)" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
+    <svg class="sie-logo" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
   </div>
 </div>
 
@@ -601,10 +600,10 @@ function showResults(){
   const icon = document.getElementById("resultIcon");
   if(won){
     icon.className = "result-icon won";
-    icon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#00ffb9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    icon.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#00ffb9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   } else {
     icon.className = "result-icon lost";
-    icon.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="#6b8a9e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    icon.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="#6b8a9e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
 
   document.getElementById("resultTitle").className = "result-title " + (won ? "won" : "lost");
