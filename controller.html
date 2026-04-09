@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Keep It Moving — Kontroller</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #000028;
+    --bgSub: #000a30;
+    --accent: #00ffb9;
+    --accentBright: #66ffd4;
+    --accentDim: rgba(0,255,185,0.12);
+    --white: #eaf2f8;
+    --mid: #6b8a9e;
+    --dim: #2a3f55;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: var(--bg); font-family: var(--sans); color: var(--white);
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .container {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; padding: 24px;
+    position: relative;
+  }
+
+  /* Subtle brand lines */
+  .brand-line { position: absolute; pointer-events: none; opacity: 0.04; }
+  .brand-line.h1 { top: 25%; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+  .brand-line.h2 { bottom: 25%; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, #00646e, transparent); }
+
+  .header {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 16px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .sie-logo-sm { height: 12px; opacity: 0.6; }
+  .logo-sub { font-size: 8px; font-family: var(--mono); color: var(--dim); letter-spacing: 2px; text-transform: uppercase; }
+  .conn { display: flex; align-items: center; gap: 6px; }
+  .conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .conn-dot.on { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .conn-dot.off { background: var(--dim); }
+  .conn-label { font-size: 9px; font-family: var(--mono); color: var(--dim); letter-spacing: 1px; }
+
+  .tap-btn {
+    width: min(300px, 72vw); height: min(300px, 72vw);
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: rgba(0, 255, 185, 0.03);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+  }
+  .tap-btn:active {
+    transform: scale(0.95);
+    background: rgba(0, 255, 185, 0.1);
+    box-shadow: 0 0 50px rgba(0, 255, 185, 0.12);
+  }
+  .tap-btn.disabled {
+    border-color: var(--dim);
+    background: transparent;
+    cursor: default;
+  }
+  .tap-btn.disabled:active {
+    transform: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .tap-icon {
+    width: 44px; height: 44px;
+    stroke: var(--accent); fill: none;
+    transition: stroke 0.15s;
+  }
+  .tap-btn.disabled .tap-icon { stroke: var(--dim); }
+
+  .tap-label {
+    font-size: 18px; font-weight: 600;
+    color: var(--accent); letter-spacing: 1px;
+    text-transform: uppercase; font-family: var(--mono);
+    transition: color 0.15s;
+  }
+  .tap-btn.disabled .tap-label { color: var(--dim); }
+
+  .pulse-ring {
+    position: absolute; inset: -8px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pulse-ring.animate {
+    animation: pulseOut 0.5s ease-out forwards;
+  }
+  @keyframes pulseOut {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.25); opacity: 0; }
+  }
+
+  .status {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 20px;
+    text-align: center;
+  }
+  .status-phase {
+    font-size: 12px; font-family: var(--mono);
+    color: var(--dim); letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .status-info {
+    font-size: 11px; font-family: var(--mono);
+    color: var(--dim); letter-spacing: 0.5px;
+  }
+
+  .game-progress {
+    width: 80%; max-width: 280px;
+    margin-top: 28px;
+  }
+  .game-progress-bar {
+    height: 3px; border-radius: 2px;
+    background: rgba(42,63,85,0.25);
+  }
+  .game-progress-fill {
+    height: 100%; border-radius: 2px;
+    background: var(--accent);
+    transition: width 0.15s ease-out;
+  }
+  .game-progress-label {
+    display: flex; justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px; font-family: var(--mono); color: var(--dim);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="brand-line h1"></div>
+  <div class="brand-line h2"></div>
+
+  <div class="header">
+    <div class="logo">
+      <svg class="sie-logo-sm" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="rgba(255,255,255,0.5)" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="rgba(255,255,255,0.5)" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="rgba(255,255,255,0.5)" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="rgba(255,255,255,0.5)" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="rgba(255,255,255,0.5)" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="rgba(255,255,255,0.5)" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="rgba(255,255,255,0.5)" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
+      <span class="logo-sub">Mobility</span>
+    </div>
+    <div class="conn">
+      <div class="conn-dot off" id="connDot"></div>
+      <span class="conn-label" id="connLabel">KOBLER TIL</span>
+    </div>
+  </div>
+
+  <div class="tap-btn disabled" id="tapBtn">
+    <div class="pulse-ring" id="pulseRing"></div>
+    <svg class="tap-icon" viewBox="0 0 48 48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="24" cy="14" r="4"/>
+      <path d="M24 20v8"/>
+      <path d="M18 28l6 8 6-8"/>
+      <path d="M12 38h24"/>
+    </svg>
+    <span class="tap-label" id="tapLabel">Venter</span>
+  </div>
+
+  <div class="game-progress" id="gameProgress" style="visibility:hidden">
+    <div class="game-progress-bar">
+      <div class="game-progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="game-progress-label">
+      <span id="progPct">0%</span>
+      <span id="progTaps">0 trykk</span>
+    </div>
+  </div>
+
+  <div class="status">
+    <div class="status-phase" id="statusPhase">Kobler til skjermen...</div>
+    <div class="status-info">Keep It Moving</div>
+  </div>
+
+</div>
+
+<script>
+const tapBtn = document.getElementById("tapBtn");
+const tapLabel = document.getElementById("tapLabel");
+const pulseRing = document.getElementById("pulseRing");
+const connDot = document.getElementById("connDot");
+const connLabel = document.getElementById("connLabel");
+const statusPhase = document.getElementById("statusPhase");
+const gameProgress = document.getElementById("gameProgress");
+const progressFill = document.getElementById("progressFill");
+const progPct = document.getElementById("progPct");
+const progTaps = document.getElementById("progTaps");
+
+let connected = false;
+let gamePhase = "intro";
+let channel = null;
+
+// =====================================================================
+// SUPABASE REALTIME
+// =====================================================================
+const SUPABASE_URL = "https://axqnrakxsegitwrgvshu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_JIrVDB3k2fc0_HkNet_yaQ_t9u5KYPm";
+
+async function connectSupabase() {
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  channel = sb.channel("keep-it-moving", {
+    config: { broadcast: { self: false } },
+  });
+
+  channel.on("broadcast", { event: "state" }, ({ payload }) => {
+    gamePhase = payload.phase;
+    updateUI();
+    if (payload.phase === "game") {
+      const pct = Math.round(payload.progress * 100);
+      progressFill.style.width = pct + "%";
+      progPct.textContent = pct + "%";
+      progTaps.textContent = payload.taps + " trykk";
+    }
+  });
+
+  channel.subscribe((status) => {
+    if (status === "SUBSCRIBED") {
+      connected = true;
+      connDot.className = "conn-dot on";
+      connLabel.textContent = "TILKOBLET";
+      updateUI();
+    } else {
+      connected = false;
+      connDot.className = "conn-dot off";
+      connLabel.textContent = "KOBLER TIL";
+    }
+  });
+}
+
+connectSupabase();
+
+// =====================================================================
+// UI STATE
+// =====================================================================
+function updateUI() {
+  if (!connected) return;
+
+  switch (gamePhase) {
+    case "intro":
+      tapBtn.classList.remove("disabled");
+      tapLabel.textContent = "Start";
+      statusPhase.textContent = "Trykk for å starte";
+      gameProgress.style.visibility = "hidden";
+      break;
+    case "game":
+      tapBtn.classList.remove("disabled");
+      tapLabel.textContent = "Trykk";
+      statusPhase.textContent = "Send kraft til toget";
+      gameProgress.style.visibility = "visible";
+      break;
+    case "results":
+      tapBtn.classList.remove("disabled");
+      tapLabel.textContent = "Igjen";
+      statusPhase.textContent = "Trykk for å spille igjen";
+      gameProgress.style.visibility = "hidden";
+      break;
+  }
+}
+
+// =====================================================================
+// TAP HANDLING
+// =====================================================================
+function sendTap() {
+  if (!connected || !channel) return;
+  if (tapBtn.classList.contains("disabled")) return;
+
+  channel.send({ type: "broadcast", event: "tap", payload: {} });
+
+  pulseRing.classList.remove("animate");
+  void pulseRing.offsetWidth;
+  pulseRing.classList.add("animate");
+}
+
+tapBtn.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  sendTap();
+}, { passive: false });
+
+tapBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  sendTap();
+});
+
+document.addEventListener("dblclick", (e) => e.preventDefault());
+document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+</script>
+</body>
+</html>
