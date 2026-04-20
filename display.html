@@ -116,6 +116,25 @@
     0%, 100% { opacity: 0.3; transform: translateY(0); }
     50% { opacity: 1; transform: translateY(8px); }
   }
+
+  /* Countdown overlay */
+  #countdown-overlay {
+    position: fixed; inset: 0; z-index: 90;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,40,0.85);
+    pointer-events: none;
+  }
+  #countdown-overlay.hidden { display: none; }
+  #countdown-overlay .cd-text {
+    font-family: var(--mono); font-size: clamp(120px, 20vw, 200px);
+    font-weight: 700; color: var(--accent);
+    text-shadow: 0 0 60px rgba(0,255,185,0.3);
+    animation: cdPop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes cdPop {
+    0% { transform: scale(1.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -129,6 +148,9 @@
 <!-- Celebration overlay (fireworks during arrival moment, before results) -->
 <div id="celebration" class="hidden"><canvas id="fwCanvas"></canvas></div>
 
+<!-- Countdown overlay -->
+<div id="countdown-overlay" class="hidden"><div class="cd-text" id="cdText"></div></div>
+
 <!-- ============ INTRO ============ -->
 <div class="screen" id="intro">
   <div class="brand-line h1"></div>
@@ -140,7 +162,7 @@
       <svg class="sie-logo-large" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537L3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001 222.616,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001 361.247,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001 585.411,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001 724.271,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537L886.047,152.537z"/></g></svg>
     </div>
     <h1>Keep It <span>Moving</span></h1>
-    <p class="sub">Trykk for å drive toget fremover.<br>Nå destinasjonen før tiden renner ut.</p>
+    <p class="sub">Trykk for å kjøre toget fremover.<br>Nå destinasjonen før tiden renner ut.</p>
     <div style="margin-top:48px" class="qr-wrap">
       <canvas id="qrIntro" width="360" height="360" style="width:360px;height:360px;border-radius:14px;background:#000028"></canvas>
       <span class="qr-label">Skann for å spille</span>
@@ -199,7 +221,26 @@
       .cls-8 {
         fill: #0c7591;
       }
-    </style>
+    
+  /* Countdown overlay */
+  #countdown-overlay {
+    position: fixed; inset: 0; z-index: 90;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,40,0.85);
+    pointer-events: none;
+  }
+  #countdown-overlay.hidden { display: none; }
+  #countdown-overlay .cd-text {
+    font-family: var(--mono); font-size: clamp(120px, 20vw, 200px);
+    font-weight: 700; color: var(--accent);
+    text-shadow: 0 0 60px rgba(0,255,185,0.3);
+    animation: cdPop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes cdPop {
+    0% { transform: scale(1.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
   </defs>
   <g id="back_building" data-name="back building">
     <g id="T_B01">
@@ -392,7 +433,26 @@
       .cls-34 {
         fill: #005451;
       }
-    </style>
+    
+  /* Countdown overlay */
+  #countdown-overlay {
+    position: fixed; inset: 0; z-index: 90;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,40,0.85);
+    pointer-events: none;
+  }
+  #countdown-overlay.hidden { display: none; }
+  #countdown-overlay .cd-text {
+    font-family: var(--mono); font-size: clamp(120px, 20vw, 200px);
+    font-weight: 700; color: var(--accent);
+    text-shadow: 0 0 60px rgba(0,255,185,0.3);
+    animation: cdPop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes cdPop {
+    0% { transform: scale(1.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
   </defs>
   <path class="cls-9" d="M503.9,184.72c-8.44-34.81-15.83-65.72-39.27-71.62-23.44-5.9-58.03-16.49-63.53-20.03-5.5-3.53-17.6-4.43-17.6-4.43,0,0-2.05,4.21-5.78,7.71-1.91,1.78-5.09,4.8-8.6,7.67-.44.08-.85.18-1.22.29-4.82,1.44-47.68,5.54-68.63-2.65-20.95-8.19-50.15-3.85-72.54,7.12-22.39,10.98-60.38,4.68-67.12,11.66-6.74,6.98-22.15,10.11-30.1,7.1.48,6.38-49.12,41.54-67.42,51.34l318.42,1.07s.02-.1.07-.28l22.97,3.66,100.34,1.39Z"/>
   <path class="cls-34" d="M520.96,194.61h-131.23s25.95-20.22,65.32-20.22,65.91,20.22,65.91,20.22Z"/>
@@ -650,6 +710,9 @@ let lastProg = 0;
 let railAnim = null;
 let fwAnim = null;
 let gameStartTime = 0;
+let activePlayer = null;       // ID of the controller that owns this round
+let lockTimeout = null;        // safety timeout to auto-unlock
+const LOCK_TIMEOUT_MS = 30000; // 30s safety fallback
 
 // =====================================================================
 // SCREEN MANAGEMENT
@@ -680,8 +743,18 @@ async function connectSupabase() {
     config: { broadcast: { self: false } },
   });
 
-  channel.on("broadcast", { event: "tap" }, () => {
+  channel.on("broadcast", { event: "tap" }, ({ payload }) => {
+    if (phase === "game" && activePlayer && payload && payload.playerId !== activePlayer) return;
     handleTap();
+  });
+
+  channel.on("broadcast", { event: "claim" }, ({ payload }) => {
+    if (phase === "intro" && !activePlayer && payload && payload.playerId) {
+      activePlayer = payload.playerId;
+      clearTimeout(lockTimeout);
+      lockTimeout = setTimeout(unlockGame, LOCK_TIMEOUT_MS);
+      startCountdown();
+    }
   });
 
   channel.subscribe((status) => {
@@ -698,7 +771,7 @@ async function connectSupabase() {
 
 function sendState() {
   if (!channel) return;
-  channel.send({ type: "broadcast", event: "state", payload: { phase, progress, timeLeft, taps } });
+  channel.send({ type: "broadcast", event: "state", payload: { phase, progress, timeLeft, taps, activePlayer } });
 }
 
 connectSupabase();
@@ -706,12 +779,43 @@ connectSupabase();
 // =====================================================================
 // GAME LOGIC
 // =====================================================================
-function startGame() {
-  phase = "game";
+function startCountdown() {
+  phase = "countdown";
   progress = 0; smoothProg = 0; timeLeft = GAME_DURATION; taps = 0;
   pulses = []; tapFlash = 0; frame = 0; lastProg = 0;
-  gameStartTime = Date.now();
   showScreen("game");
+  startRailCanvas();
+  startBirds();
+  sendState();
+
+  const cdOverlay = document.getElementById("countdown-overlay");
+  const cdText = document.getElementById("cdText");
+  cdOverlay.classList.remove("hidden");
+
+  const steps = ["3", "2", "1", "TRYKK!"];
+  let i = 0;
+  cdText.textContent = steps[0];
+  cdText.style.animation = "none"; void cdText.offsetWidth; cdText.style.animation = "";
+
+  const cdInterval = setInterval(() => {
+    i++;
+    if (i < steps.length) {
+      cdText.textContent = steps[i];
+      cdText.style.animation = "none"; void cdText.offsetWidth; cdText.style.animation = "";
+    }
+    if (i >= steps.length) {
+      clearInterval(cdInterval);
+      setTimeout(() => {
+        cdOverlay.classList.add("hidden");
+        startGame();
+      }, 400);
+    }
+  }, 800);
+}
+
+function startGame() {
+  phase = "game";
+  gameStartTime = Date.now();
   sendState();
 
   clearInterval(timerInterval);
@@ -719,19 +823,25 @@ function startGame() {
     if(timeLeft <= 0.02){ timeLeft = 0; } else { timeLeft = Math.max(0, timeLeft - 1/60); }
     if(timeLeft <= 0 || progress >= 1) endGame();
   }, 1000/60);
+}
 
-  startRailCanvas();
-  startBirds();
+function unlockGame() {
+  activePlayer = null;
+  clearTimeout(lockTimeout);
+  if (phase !== "intro") {
+    goIntro();
+  }
+  sendState();
 }
 
 function endGame() {
   clearInterval(timerInterval);
+  clearTimeout(lockTimeout);
   finalProgress = Math.min(1, progress);
   finalTaps = taps;
   const won = finalProgress >= 1;
 
   if (won) {
-    // Celebration beat: fireworks on game screen, then results
     showCelebration();
     setTimeout(()=>{
       hideCelebration();
@@ -743,8 +853,9 @@ function endGame() {
 }
 
 function handleTap() {
-  if (phase === "intro") { startGame(); return; }
+  if (phase === "intro") { startCountdown(); activePlayer = "local"; clearTimeout(lockTimeout); lockTimeout = setTimeout(unlockGame, LOCK_TIMEOUT_MS); sendState(); return; }
   if (phase === "results") { goIntro(); return; }
+  if (phase === "countdown") return;
   if (phase !== "game" || timeLeft <= 0 || progress >= 1) return;
 
   taps++;
@@ -761,10 +872,13 @@ function handleTap() {
 
 function goIntro() {
   phase = "intro";
+  activePlayer = null;
+  clearTimeout(lockTimeout);
   cancelAnimationFrame(railAnim);
   cancelAnimationFrame(fwAnim);
   cancelAnimationFrame(birdsAnim);
   hideCelebration();
+  document.getElementById("countdown-overlay").classList.add("hidden");
   showScreen("intro");
   sendState();
 }
