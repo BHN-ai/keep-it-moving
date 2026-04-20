@@ -694,6 +694,12 @@ function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
 function easeOut(t){return 1-Math.pow(1-t,3)}
 
 // =====================================================================
+// SESSION ID
+// =====================================================================
+const SESSION_ID = Math.random().toString(36).substr(2, 6);
+const CHANNEL_NAME = "kim-" + SESSION_ID;
+
+// =====================================================================
 // STATE
 // =====================================================================
 let phase = "intro";
@@ -739,7 +745,7 @@ async function connectSupabase() {
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  channel = sb.channel("keep-it-moving", {
+  channel = sb.channel(CHANNEL_NAME, {
     config: { broadcast: { self: false } },
   });
 
@@ -1196,15 +1202,14 @@ function showResults(){
   sendState();
 
   const won = finalProgress >= 1;
-  const distPct = Math.round(finalProgress*100);
-  const power = Math.round(finalTaps * 14);
+  const distKm = Math.round(finalProgress * 130);
+  const elapsed = Math.round((Date.now() - gameStartTime) / 1000);
+  const timeSec = Math.min(elapsed, GAME_DURATION);
 
-  // Flow score: based on tap rhythm consistency
-  // Measures how evenly distributed taps were over the game duration
-  const elapsed = (Date.now() - gameStartTime) / 1000;
-  const idealTPS = TAPS_TO_WIN / GAME_DURATION;
-  const actualTPS = finalTaps / Math.max(1, elapsed);
-  const rhythmScore = Math.round(clamp(1 - Math.abs(actualTPS - idealTPS) / idealTPS, 0.2, 1) * finalProgress * 100);
+  // Energy efficiency: taps per km — lower is better, more meaningful variation
+  // If no distance covered, show 0
+  const energyPerKm = distKm > 0 ? (finalTaps / distKm * 10) : 0;
+  const energyDisplay = energyPerKm > 0 ? energyPerKm.toFixed(1) : "—";
 
   document.getElementById("glowBg").classList.toggle("hidden", !won);
 
@@ -1219,10 +1224,10 @@ function showResults(){
 
   document.getElementById("resultTitle").className = "result-title " + (won ? "won" : "lost");
   document.getElementById("resultTitle").textContent = won ? "Toget er fremme!" : "Nesten fremme!";
-  document.getElementById("resultSub").textContent = won ? "Destinasjonen ble nådd" : `${distPct}% av reisen fullført`;
+  document.getElementById("resultSub").textContent = won ? "Hamar — Oslo fullført" : `${distKm} av 130 km tilbakelagt`;
 
   const sw = document.getElementById("statsWrap");
-  sw.innerHTML = statHTML("Distanse nådd", distPct, "%", won) + statHTML("Kraft sendt", power, "kW", false) + statHTML("Flytscore", rhythmScore, "poeng", false);
+  sw.innerHTML = statHTML("Distanse kjørt", distKm, "km", won) + statHTML("Energiforbruk", energyDisplay, "kWh/km", false) + statHTML("Tid brukt", timeSec, "sek", false);
 }
 
 function statHTML(label, value, unit, hl){
@@ -1245,32 +1250,25 @@ document.getElementById("results").addEventListener("click", handleTap);
 // Uses qr-creator-es6 algorithm — proven, minimal, correct
 // =====================================================================
 (function(){
-  // QR Code generator adapted from Project Nayuki (MIT License)
-  // https://www.nayuki.io/page/qr-code-generator-library
-  const QR_URL = "https://keep-it-moving-lilac.vercel.app/controller.html";
+  const QR_URL = window.location.origin + "/controller.html?s=" + SESSION_ID;
 
   function drawQR(canvasId){
     const canvas = document.getElementById(canvasId);
     if(!canvas) return;
-    // Use an image from a public QR API embedded as a static data approach
-    // Since we need offline reliability, we use Google Charts static URL via img
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = function(){
       const ctx = canvas.getContext("2d");
       const s = canvas.width;
-      // Fill background
       ctx.fillStyle = "#000028";
       ctx.beginPath();
       ctx.roundRect(0, 0, s, s, 14);
       ctx.fill();
-      // Draw QR centered with padding
       const pad = 20;
       const qrSize = s - pad*2;
       ctx.drawImage(img, pad, pad, qrSize, qrSize);
     };
     img.onerror = function(){
-      // Fallback: draw a placeholder with the URL text
       const ctx = canvas.getContext("2d");
       const s = canvas.width;
       ctx.fillStyle = "#000028";
@@ -1280,9 +1278,8 @@ document.getElementById("results").addEventListener("click", handleTap);
       ctx.textAlign = "center";
       ctx.fillText("QR loading...", s/2, s/2);
     };
-    // Use QR Server API (free, no key, reliable, returns PNG)
     const encoded = encodeURIComponent(QR_URL);
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encoded}&bgcolor=000028&color=eaf2f8&format=png&margin=1`;
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=" + encoded + "&bgcolor=000028&color=eaf2f8&format=png&margin=1";
   }
 
   drawQR("qrIntro");
