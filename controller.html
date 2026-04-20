@@ -203,7 +203,7 @@
 
   <div class="status">
     <div class="status-phase" id="statusPhase">Kobler til skjermen...</div>
-    <div class="status-info">Keep It Moving</div>
+    <div class="status-info">Keep It Moving — <span id="sessionLabel"></span></div>
   </div>
 
 </div>
@@ -221,11 +221,26 @@ const progPct = document.getElementById("progPct");
 const progTaps = document.getElementById("progTaps");
 const lockedMsg = document.getElementById("lockedMsg");
 
+// Show session info
+document.getElementById("sessionLabel").textContent = SESSION_ID === "default" ? "ingen sesjon" : "sesjon " + SESSION_ID;
+
+// If no session ID provided, show error state
+if (SESSION_ID === "default") {
+  statusPhase.textContent = "Skann QR-koden på skjermen";
+  tapBtn.classList.add("disabled");
+  tapLabel.textContent = "Venter";
+}
+
 let connected = false;
 let gamePhase = "intro";
 let channel = null;
 let isActivePlayer = false;
 const myPlayerId = "ctrl-" + Math.random().toString(36).substr(2, 9);
+
+// Read session ID from URL parameter ?s=
+const urlParams = new URLSearchParams(window.location.search);
+const SESSION_ID = urlParams.get("s") || "default";
+const CHANNEL_NAME = "kim-" + SESSION_ID;
 
 // =====================================================================
 // SUPABASE REALTIME
@@ -237,7 +252,7 @@ async function connectSupabase() {
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  channel = sb.channel("keep-it-moving", {
+  channel = sb.channel(CHANNEL_NAME, {
     config: { broadcast: { self: false } },
   });
 
