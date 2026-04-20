@@ -1072,9 +1072,7 @@ function startRailCanvas() {
     if(arr){ ctx.beginPath(); ctx.arc(rR,rY-34,12,0,Math.PI*2); ctx.fillStyle="rgba(0,255,185,0.15)"; ctx.fill(); }
 
     ctx.fillStyle=arr?C.accent:(dp>0?`rgba(0,255,185,${(0.35+dp*0.5).toFixed(3)})`:C.mid);
-    ctx.font=`600 14px ${mono}`; ctx.textAlign="center"; ctx.fillText("OSLO",rR,rY+50);
     const oa=prog<0.15?0.5:0.2;
-    ctx.fillStyle=`rgba(107,138,158,${oa})`; ctx.font=`600 14px ${mono}`; ctx.textAlign="center"; ctx.fillText("HAMAR",rL,rY+50);
     ctx.fillStyle=C.dim+"30"; ctx.beginPath(); ctx.roundRect(rL-2,rY-16,4,32,2); ctx.fill();
 
     // City labels above skylines
