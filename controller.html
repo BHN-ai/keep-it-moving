@@ -145,6 +145,18 @@
     margin-top: 8px;
     font-size: 11px; font-family: var(--mono); color: var(--dim);
   }
+
+  /* Locked out state */
+  .locked-msg {
+    text-align: center; padding: 0 24px;
+  }
+  .locked-msg .title {
+    font-size: 20px; font-weight: 600; color: var(--mid);
+    margin-bottom: 8px;
+  }
+  .locked-msg .sub {
+    font-size: 14px; color: var(--dim); font-family: var(--mono);
+  }
 </style>
 </head>
 <body>
@@ -184,6 +196,11 @@
     </div>
   </div>
 
+  <div id="lockedMsg" class="locked-msg" style="display:none">
+    <div class="title">Spillet er opptatt</div>
+    <div class="sub">Vent til neste runde</div>
+  </div>
+
   <div class="status">
     <div class="status-phase" id="statusPhase">Kobler til skjermen...</div>
     <div class="status-info">Keep It Moving</div>
@@ -202,10 +219,13 @@ const gameProgress = document.getElementById("gameProgress");
 const progressFill = document.getElementById("progressFill");
 const progPct = document.getElementById("progPct");
 const progTaps = document.getElementById("progTaps");
+const lockedMsg = document.getElementById("lockedMsg");
 
 let connected = false;
 let gamePhase = "intro";
 let channel = null;
+let isActivePlayer = false;
+const myPlayerId = "ctrl-" + Math.random().toString(36).substr(2, 9);
 
 // =====================================================================
 // SUPABASE REALTIME
@@ -223,8 +243,16 @@ async function connectSupabase() {
 
   channel.on("broadcast", { event: "state" }, ({ payload }) => {
     gamePhase = payload.phase;
+
+    if (payload.activePlayer) {
+      isActivePlayer = (payload.activePlayer === myPlayerId);
+    } else {
+      isActivePlayer = false;
+    }
+
     updateUI();
-    if (payload.phase === "game") {
+
+    if (isActivePlayer && payload.phase === "game") {
       const pct = Math.round(payload.progress * 100);
       progressFill.style.width = pct + "%";
       progPct.textContent = pct + "%";
@@ -254,24 +282,56 @@ connectSupabase();
 function updateUI() {
   if (!connected) return;
 
+  const locked = !isActivePlayer && gamePhase !== "intro";
+
+  if (locked && (gamePhase === "game" || gamePhase === "countdown")) {
+    tapBtn.classList.add("disabled");
+    tapLabel.textContent = "Opptatt";
+    lockedMsg.style.display = "block";
+    gameProgress.style.visibility = "hidden";
+    statusPhase.textContent = "";
+    return;
+  }
+
+  lockedMsg.style.display = "none";
+
   switch (gamePhase) {
     case "intro":
+      isActivePlayer = false;
       tapBtn.classList.remove("disabled");
       tapLabel.textContent = "Start";
-      statusPhase.textContent = "Trykk for å starte";
+      statusPhase.textContent = "Trykk for \u00e5 starte";
       gameProgress.style.visibility = "hidden";
+      break;
+    case "countdown":
+      if (isActivePlayer) {
+        tapBtn.classList.add("disabled");
+        tapLabel.textContent = "Klar...";
+        statusPhase.textContent = "Se p\u00e5 skjermen!";
+        gameProgress.style.visibility = "hidden";
+      }
       break;
     case "game":
-      tapBtn.classList.remove("disabled");
-      tapLabel.textContent = "Trykk";
-      statusPhase.textContent = "Send kraft til toget";
-      gameProgress.style.visibility = "visible";
+      if (isActivePlayer) {
+        tapBtn.classList.remove("disabled");
+        tapLabel.textContent = "Trykk";
+        statusPhase.textContent = "Send kraft til toget";
+        gameProgress.style.visibility = "visible";
+      }
       break;
     case "results":
-      tapBtn.classList.remove("disabled");
-      tapLabel.textContent = "Igjen";
-      statusPhase.textContent = "Trykk for å spille igjen";
-      gameProgress.style.visibility = "hidden";
+      if (isActivePlayer) {
+        tapBtn.classList.remove("disabled");
+        tapLabel.textContent = "Igjen";
+        statusPhase.textContent = "Trykk for \u00e5 spille igjen";
+        gameProgress.style.visibility = "hidden";
+      } else {
+        tapBtn.classList.remove("disabled");
+        tapLabel.textContent = "Start";
+        statusPhase.textContent = "Trykk for \u00e5 starte";
+        gameProgress.style.visibility = "hidden";
+        lockedMsg.style.display = "none";
+      }
       break;
   }
 }
@@ -283,7 +343,16 @@ function sendTap() {
   if (!connected || !channel) return;
   if (tapBtn.classList.contains("disabled")) return;
 
-  channel.send({ type: "broadcast", event: "tap", payload: {} });
+  if (gamePhase === "intro" && !isActivePlayer) {
+    isActivePlayer = true;
+    channel.send({ type: "broadcast", event: "claim", payload: { playerId: myPlayerId } });
+    tapBtn.classList.add("disabled");
+    tapLabel.textContent = "Klar...";
+    statusPhase.textContent = "Se p\u00e5 skjermen!";
+    return;
+  }
+
+  channel.send({ type: "broadcast", event: "tap", payload: { playerId: myPlayerId } });
 
   pulseRing.classList.remove("animate");
   void pulseRing.offsetWidth;
