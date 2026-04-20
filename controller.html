@@ -275,14 +275,25 @@ async function connectSupabase() {
     }
   });
 
-  channel.subscribe((status) => {
+  channel.subscribe((status, err) => {
     if (status === "SUBSCRIBED") {
       connected = true;
       connDot.className = "conn-dot on";
       connLabel.textContent = "TILKOBLET";
+      statusPhase.textContent = "Trykk for \u00e5 starte";
       updateUI();
-    } else {
+    } else if (status === "CHANNEL_ERROR") {
       connected = false;
+      connDot.className = "conn-dot off";
+      connLabel.textContent = "FEIL";
+      statusPhase.textContent = "Tilkoblingsfeil — pr\u00f8v igjen";
+      console.error("Channel error:", err);
+    } else if (status === "TIMED_OUT") {
+      connected = false;
+      connDot.className = "conn-dot off";
+      connLabel.textContent = "TIDSAVBRUDD";
+      statusPhase.textContent = "Kunne ikke koble til";
+    } else {
       connDot.className = "conn-dot off";
       connLabel.textContent = "KOBLER TIL";
     }
