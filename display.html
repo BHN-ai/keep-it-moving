@@ -763,11 +763,18 @@ async function connectSupabase() {
     }
   });
 
-  channel.subscribe((status) => {
+  channel.subscribe((status, err) => {
     if (status === "SUBSCRIBED") {
       connDot.className = "conn-dot on";
       connLabel.textContent = "TILKOBLET";
       sendState();
+    } else if (status === "CHANNEL_ERROR") {
+      connDot.className = "conn-dot off";
+      connLabel.textContent = "FEIL";
+      console.error("Channel error:", err);
+    } else if (status === "TIMED_OUT") {
+      connDot.className = "conn-dot off";
+      connLabel.textContent = "TIDSAVBRUDD";
     } else {
       connDot.className = "conn-dot off";
       connLabel.textContent = "KOBLER TIL";
@@ -1239,6 +1246,12 @@ function statHTML(label, value, unit, hl){
 // =====================================================================
 document.addEventListener("keydown", e=>{
   if(e.key===" "||e.key==="Enter"){ e.preventDefault(); handleTap(); }
+  // Admin reset: press R to force-unlock and return to intro
+  if(e.key==="r"||e.key==="R"){
+    console.log("Admin reset triggered");
+    clearInterval(timerInterval);
+    unlockGame();
+  }
 });
 document.getElementById("game").addEventListener("click", handleTap);
 document.getElementById("game").addEventListener("touchstart", e=>{ e.preventDefault(); handleTap(); }, {passive:false});
