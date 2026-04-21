@@ -743,7 +743,13 @@ let channel = null;
 
 async function connectSupabase() {
   const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+    realtime: {
+      params: {
+        eventsPerSecond: 10
+      }
+    }
+  });
 
   channel = sb.channel(CHANNEL_NAME, {
     config: { broadcast: { self: false } },
@@ -764,6 +770,7 @@ async function connectSupabase() {
   });
 
   channel.subscribe((status, err) => {
+    console.log("Display channel status:", status, err);
     if (status === "SUBSCRIBED") {
       connDot.className = "conn-dot on";
       connLabel.textContent = "TILKOBLET";
