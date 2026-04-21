@@ -160,6 +160,90 @@
   .locked-msg .sub {
     font-size: 14px; color: var(--dim); font-family: var(--mono);
   }
+
+  /* ============ NAME ENTRY OVERLAY ============ */
+  .name-entry {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px 24px;
+    background: rgba(0, 0, 40, 0.97);
+    z-index: 100;
+    gap: 16px;
+  }
+  .name-entry.hidden { display: none; }
+  .name-entry .rank-badge {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); font-weight: 600;
+  }
+  .name-entry .title {
+    font-size: 26px; font-weight: 600; color: var(--white);
+    text-align: center; line-height: 1.25;
+  }
+  .name-entry .sub {
+    font-size: 13px; color: var(--mid);
+    text-align: center; font-family: var(--mono);
+    max-width: 280px; line-height: 1.5;
+  }
+  .name-entry .input-wrap {
+    width: 100%; max-width: 320px;
+    margin-top: 8px;
+  }
+  .name-entry input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 18px;
+    font-family: var(--sans);
+    color: var(--white);
+    background: rgba(0, 10, 48, 0.8);
+    border: 1.5px solid var(--accentDim);
+    border-radius: 8px;
+    outline: none;
+    letter-spacing: 0.3px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .name-entry input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(0, 255, 185, 0.2);
+  }
+  .name-entry input[type="text"]::placeholder {
+    color: var(--dim);
+    opacity: 1;
+  }
+  .name-entry .hint {
+    font-size: 11px; font-family: var(--mono);
+    color: var(--dim); letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .name-entry .error {
+    font-size: 13px; color: #ff6680;
+    font-family: var(--mono); letter-spacing: 0.3px;
+    min-height: 18px; text-align: center;
+  }
+  .name-entry .submit-btn {
+    min-width: 160px;
+    padding: 14px 24px;
+    font-size: 15px; font-weight: 600;
+    font-family: var(--mono); letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000028;
+    background: var(--accent);
+    border: none; border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.08s;
+  }
+  .name-entry .submit-btn:active { transform: scale(0.96); }
+  .name-entry .submit-btn:disabled {
+    background: var(--dim); color: var(--mid);
+    cursor: default;
+  }
+  .name-entry .success {
+    font-size: 15px; color: var(--accent);
+    font-family: var(--mono); letter-spacing: 1px;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -209,6 +293,20 @@
     <div class="status-info">Keep It Moving — <span id="sessionLabel"></span></div>
   </div>
 
+  <!-- Name entry overlay (shown only when display confirms qualification) -->
+  <div class="name-entry hidden" id="nameEntry">
+    <div class="rank-badge" id="rankBadge">TOPP 10</div>
+    <div class="title">Gratulerer!</div>
+    <div class="sub">Du kom på topplisten. Skriv inn bedriftsnavn for å lagre resultatet.</div>
+    <div class="input-wrap">
+      <input type="text" id="companyInput" placeholder="Bedriftsnavn" maxlength="24" autocomplete="off" autocapitalize="words" spellcheck="false" />
+    </div>
+    <div class="hint">2–24 tegn · bokstaver, tall, mellomrom, . - &amp;</div>
+    <div class="error" id="nameError"></div>
+    <button type="button" class="submit-btn" id="submitName">Send inn</button>
+    <div class="success hidden" id="nameSuccess"></div>
+  </div>
+
 </div>
 
 <script>
@@ -223,6 +321,12 @@ const progressFill = document.getElementById("progressFill");
 const progPct = document.getElementById("progPct");
 const progTaps = document.getElementById("progTaps");
 const lockedMsg = document.getElementById("lockedMsg");
+const nameEntry = document.getElementById("nameEntry");
+const rankBadge = document.getElementById("rankBadge");
+const companyInput = document.getElementById("companyInput");
+const nameError = document.getElementById("nameError");
+const nameSuccess = document.getElementById("nameSuccess");
+const submitNameBtn = document.getElementById("submitName");
 
 // =====================================================================
 // SESSION / IDENTITY — declared FIRST so any later code can safely use them.
@@ -260,6 +364,37 @@ let gamePhase = "intro";
 let channel = null;
 let isActivePlayer = false;
 let lastJoinRequestAt = 0;
+let pendingQualification = null; // { runId, rank, completed } — set by display's qualify_prompt
+
+const NAME_RE = /^[A-Za-zÆØÅæøå0-9 .&\-]+$/;
+
+function validateCompanyName(raw) {
+  if (typeof raw !== "string") return { ok: false, error: "Ugyldig navn" };
+  const cleaned = raw.trim().replace(/\s+/g, " ");
+  if (cleaned.length < 2) return { ok: false, error: "Navnet må være minst 2 tegn" };
+  if (cleaned.length > 24) return { ok: false, error: "Navnet kan maks være 24 tegn" };
+  if (!NAME_RE.test(cleaned)) return { ok: false, error: "Navnet inneholder ugyldige tegn" };
+  return { ok: true, value: cleaned };
+}
+
+function showNameEntry(rank) {
+  rankBadge.textContent = "TOPP 10 · RANG #" + rank;
+  companyInput.value = "";
+  nameError.textContent = "";
+  nameSuccess.classList.add("hidden");
+  nameSuccess.textContent = "";
+  submitNameBtn.disabled = false;
+  submitNameBtn.textContent = "Send inn";
+  nameEntry.classList.remove("hidden");
+  setTimeout(() => companyInput.focus(), 50);
+}
+
+function hideNameEntry() {
+  nameEntry.classList.add("hidden");
+  nameError.textContent = "";
+  nameSuccess.classList.add("hidden");
+  companyInput.value = "";
+}
 
 // =====================================================================
 // SUPABASE REALTIME
@@ -321,6 +456,36 @@ async function connectSupabase() {
         progressFill.style.width = pct + "%";
         progPct.textContent = pct + "%";
         progTaps.textContent = payload.taps + " trykk";
+      }
+    });
+
+    channel.on("broadcast", { event: "qualify_prompt" }, ({ payload }) => {
+      if (!payload || payload.controllerId !== controllerId) return;
+      console.log("[CTRL] qualify_prompt received", payload);
+      pendingQualification = {
+        runId: payload.runId,
+        rank: payload.rank,
+        completed: !!payload.completed,
+      };
+      showNameEntry(payload.rank);
+    });
+
+    channel.on("broadcast", { event: "name_result" }, ({ payload }) => {
+      if (!payload || payload.controllerId !== controllerId) return;
+      if (!pendingQualification || pendingQualification.runId !== payload.runId) return;
+      console.log("[CTRL] name_result received", payload);
+      if (payload.success) {
+        nameError.textContent = "";
+        nameSuccess.textContent = "Lagret! " + (payload.companyName || "") + " · rang " + (payload.rank || pendingQualification.rank);
+        nameSuccess.classList.remove("hidden");
+        submitNameBtn.disabled = true;
+        submitNameBtn.textContent = "Lagret";
+        pendingQualification = null;
+        setTimeout(() => hideNameEntry(), 2500);
+      } else {
+        nameError.textContent = payload.message || "Kunne ikke lagre";
+        submitNameBtn.disabled = false;
+        submitNameBtn.textContent = "Send inn";
       }
     });
 
@@ -479,7 +644,61 @@ tapBtn.addEventListener("click", (e) => {
 });
 
 document.addEventListener("dblclick", (e) => e.preventDefault());
-document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+document.addEventListener("touchmove", (e) => {
+  // Allow touchmove inside the name entry input so iOS selection/scroll works
+  if (nameEntry && !nameEntry.classList.contains("hidden")) return;
+  e.preventDefault();
+}, { passive: false });
+
+// =====================================================================
+// NAME ENTRY SUBMIT
+// =====================================================================
+function submitCompanyName() {
+  if (!pendingQualification) return;
+  if (!channel || !connected) {
+    nameError.textContent = "Ikke tilkoblet";
+    return;
+  }
+  const v = validateCompanyName(companyInput.value);
+  if (!v.ok) {
+    nameError.textContent = v.error;
+    return;
+  }
+  nameError.textContent = "";
+  submitNameBtn.disabled = true;
+  submitNameBtn.textContent = "Sender...";
+  console.log("[CTRL] name_submit sent", { runId: pendingQualification.runId, name: v.value });
+  channel.send({ type: "broadcast", event: "name_submit", payload: {
+    controllerId,
+    runId: pendingQualification.runId,
+    name: v.value,
+  }});
+}
+
+submitNameBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  submitCompanyName();
+});
+
+companyInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    submitCompanyName();
+  }
+});
+
+// Clear any pending name-entry when the round resets (display went back to intro
+// without us submitting, countdown of a new round starts, or we lost ownership).
+function clearPendingNameEntryIfStale() {
+  const entryOpen = !nameEntry.classList.contains("hidden");
+  if (!entryOpen) return;
+  if (gamePhase !== "results") {
+    console.log("[CTRL] round reset — closing stale name entry");
+    pendingQualification = null;
+    hideNameEntry();
+  }
+}
+setInterval(clearPendingNameEntryIfStale, 500);
 </script>
 </body>
 </html>

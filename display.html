@@ -135,6 +135,83 @@
     0% { transform: scale(1.6); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
   }
+
+  /* ============ LEADERBOARD ============ */
+  .lb-panel {
+    font-family: var(--mono);
+    width: 360px;
+    padding: 22px 24px;
+    background: rgba(0, 10, 48, 0.55);
+    border: 1px solid rgba(0, 255, 185, 0.14);
+    border-radius: 10px;
+    z-index: 6;
+  }
+  .lb-panel.pinned {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .lb-panel.results-pinned {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .lb-title {
+    font-size: 11px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 255, 185, 0.18);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .lb-title .lb-subtitle {
+    font-size: 9px; color: var(--mid);
+    letter-spacing: 2px; font-weight: 400;
+  }
+  .lb-list { display: flex; flex-direction: column; }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    column-gap: 12px;
+    padding: 7px 0;
+    align-items: baseline;
+    font-size: 12.5px;
+    border-bottom: 1px dashed rgba(42, 63, 85, 0.22);
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row .rank { color: var(--dim); font-weight: 600; font-size: 11px; }
+  .lb-row .name {
+    color: var(--white);
+    opacity: 0.92;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--sans);
+    letter-spacing: 0.2px;
+    font-weight: 500;
+  }
+  .lb-row .stat {
+    color: var(--accent);
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+    font-size: 11.5px;
+  }
+  .lb-row.incomplete .stat { color: var(--mid); }
+  .lb-row.empty .name { color: var(--dim); opacity: 0.35; font-family: var(--mono); letter-spacing: 2px; }
+  .lb-row.empty .stat { color: var(--dim); opacity: 0.35; }
+  .lb-row.just-added {
+    animation: lbPulse 1.6s ease-out;
+  }
+  @keyframes lbPulse {
+    0% { background: rgba(0, 255, 185, 0.25); }
+    100% { background: transparent; }
+  }
 </style>
 </head>
 <body>
@@ -173,6 +250,11 @@
       </div>
       <span class="hint-text">trykk eller bruk mellomrom</span>
     </div>
+  </div>
+  <!-- Leaderboard panel (intro) -->
+  <div class="lb-panel pinned" id="introLeaderboard">
+    <div class="lb-title">Topp 10 bedrifter <span class="lb-subtitle">Keep It Moving</span></div>
+    <div class="lb-list" id="introLbList"></div>
   </div>
 </div>
 <div class="screen hidden" id="game">
@@ -664,6 +746,11 @@
       <span class="qr-label">Skann for å spille igjen</span>
     </div>
   </div>
+  <!-- Leaderboard panel (results) -->
+  <div class="lb-panel results-pinned" id="resultsLeaderboard">
+    <div class="lb-title">Topp 10 bedrifter <span class="lb-subtitle">Keep It Moving</span></div>
+    <div class="lb-list" id="resultsLbList"></div>
+  </div>
   <div class="brand-bar" style="justify-content:center">
     <svg class="sie-logo" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537z"/></g></svg>
   </div>
@@ -740,10 +827,109 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const connDot = document.getElementById("connDot");
 const connLabel = document.getElementById("connLabel");
 let channel = null;
+let sb = null;
+
+// =====================================================================
+// LEADERBOARD — state + ranking + validation
+// =====================================================================
+let leaderboard = [];           // top-10 snapshot (visible, sorted)
+let currentRun = null;          // snapshot of the most recent finished run
+let pendingQualification = null; // { run, rank, controllerId, runId }
+let justAddedId = null;         // row id to highlight briefly after insert
+
+const NAME_RE = /^[A-Za-zÆØÅæøå0-9 .&\-]+$/;
+
+function validateCompanyName(raw) {
+  if (typeof raw !== "string") return { ok: false, error: "Ugyldig navn" };
+  const cleaned = raw.trim().replace(/\s+/g, " ");
+  if (cleaned.length < 2) return { ok: false, error: "Navnet må være minst 2 tegn" };
+  if (cleaned.length > 24) return { ok: false, error: "Navnet kan maks være 24 tegn" };
+  if (!NAME_RE.test(cleaned)) return { ok: false, error: "Navnet inneholder ugyldige tegn" };
+  return { ok: true, value: cleaned };
+}
+
+// Ranking comparator. Returns <0 if a ranks higher (better) than b.
+function compareRuns(a, b) {
+  if (a.completed && !b.completed) return -1;
+  if (!a.completed && b.completed) return 1;
+  if (a.completed && b.completed) {
+    if (a.completion_time_ms !== b.completion_time_ms) return a.completion_time_ms - b.completion_time_ms;
+    return a.energy_used - b.energy_used;
+  }
+  if (a.distance_percent !== b.distance_percent) return b.distance_percent - a.distance_percent;
+  return a.energy_used - b.energy_used;
+}
+
+// Determine what rank a new run would take against the current top-10 snapshot.
+// Returns 1..10 if it qualifies, or null if it doesn't.
+function evaluateQualification(run, topSnapshot) {
+  const combined = topSnapshot.concat([run]);
+  combined.sort(compareRuns); // stable sort → ties let existing entries stay ahead
+  const idx = combined.indexOf(run);
+  const rank = idx + 1;
+  if (rank > 10) return null;
+  return rank;
+}
+
+async function loadLeaderboard() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from("leaderboard")
+      .select("id, company_name, completed, completion_time_ms, distance_percent, energy_used, created_at")
+      .eq("is_hidden", false)
+      .order("completed", { ascending: false })
+      .order("completion_time_ms", { ascending: true, nullsFirst: false })
+      .order("distance_percent", { ascending: false })
+      .order("energy_used", { ascending: true })
+      .limit(10);
+    if (error) {
+      console.error("[DISP] leaderboard fetch error:", error);
+      return;
+    }
+    leaderboard = data || [];
+    console.log("[DISP] leaderboard loaded, rows:", leaderboard.length);
+    renderLeaderboards();
+  } catch (e) {
+    console.error("[DISP] leaderboard fetch exception:", e);
+  }
+}
+
+function formatLbStat(entry) {
+  if (entry.completed) {
+    const secs = (entry.completion_time_ms / 1000).toFixed(2);
+    return `${secs}s`;
+  }
+  const pct = Math.round((entry.distance_percent || 0) * 100);
+  return `${pct}%`;
+}
+
+function renderLeaderboard(listId) {
+  const host = document.getElementById(listId);
+  if (!host) return;
+  const rows = [];
+  for (let i = 0; i < 10; i++) {
+    const entry = leaderboard[i];
+    if (!entry) {
+      rows.push(`<div class="lb-row empty"><span class="rank">${(i+1).toString().padStart(2,"0")}</span><span class="name">———</span><span class="stat">—</span></div>`);
+      continue;
+    }
+    const cls = ["lb-row"];
+    if (!entry.completed) cls.push("incomplete");
+    if (entry.id === justAddedId) cls.push("just-added");
+    const safeName = (entry.company_name || "").replace(/[<&>"']/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;","'":"&#39;"}[c]));
+    rows.push(`<div class="${cls.join(' ')}"><span class="rank">${(i+1).toString().padStart(2,"0")}</span><span class="name">${safeName}</span><span class="stat">${formatLbStat(entry)}</span></div>`);
+  }
+  host.innerHTML = rows.join("");
+}
+
+function renderLeaderboards() {
+  renderLeaderboard("introLbList");
+  renderLeaderboard("resultsLbList");
+}
 
 async function connectSupabase() {
   const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
     realtime: {
       params: {
         eventsPerSecond: 10
@@ -767,6 +953,73 @@ async function connectSupabase() {
     clearTimeout(lockTimeout);
     lockTimeout = setTimeout(unlockGame, LOCK_TIMEOUT_MS);
     handleTap();
+  });
+
+  channel.on("broadcast", { event: "name_submit" }, async ({ payload }) => {
+    if (!payload) return;
+    const cid = payload.controllerId;
+    const runId = payload.runId;
+    const rawName = payload.name;
+    console.log("[DISP] name_submit received:", { cid, runId, name: rawName });
+
+    if (!pendingQualification || pendingQualification.controllerId !== cid || pendingQualification.runId !== runId) {
+      console.log("[DISP] name_submit rejected — stale/unknown qualification");
+      channel.send({ type: "broadcast", event: "name_result", payload: {
+        controllerId: cid, runId, success: false, message: "Kvalifiseringen er utløpt"
+      }});
+      return;
+    }
+
+    const v = validateCompanyName(rawName);
+    if (!v.ok) {
+      console.log("[DISP] name_submit validation failed:", v.error);
+      channel.send({ type: "broadcast", event: "name_result", payload: {
+        controllerId: cid, runId, success: false, message: v.error
+      }});
+      return;
+    }
+
+    const run = pendingQualification.run;
+    const savedRank = pendingQualification.rank;
+    const entry = {
+      company_name: v.value,
+      completed: !!run.completed,
+      completion_time_ms: run.completed ? Math.max(0, Math.round(run.completion_time_ms)) : null,
+      distance_percent: Number((run.distance_percent || 0).toFixed(5)),
+      energy_used: Math.max(0, Math.round(run.energy_used || 0)),
+      session_id: SESSION_ID,
+    };
+
+    if (!sb) {
+      channel.send({ type: "broadcast", event: "name_result", payload: {
+        controllerId: cid, runId, success: false, message: "Databasen er ikke tilkoblet"
+      }});
+      return;
+    }
+
+    try {
+      const { data, error } = await sb.from("leaderboard").insert(entry).select().single();
+      if (error) {
+        console.error("[DISP] leaderboard insert error:", error);
+        channel.send({ type: "broadcast", event: "name_result", payload: {
+          controllerId: cid, runId, success: false, message: "Kunne ikke lagre. Prøv igjen."
+        }});
+        return;
+      }
+      console.log("[DISP] leaderboard entry saved:", data);
+      pendingQualification = null;
+      justAddedId = data && data.id;
+      await loadLeaderboard();
+      setTimeout(() => { if (justAddedId === (data && data.id)) { justAddedId = null; renderLeaderboards(); } }, 3000);
+      channel.send({ type: "broadcast", event: "name_result", payload: {
+        controllerId: cid, runId, success: true, message: "Lagt til!", rank: savedRank, companyName: v.value
+      }});
+    } catch (e) {
+      console.error("[DISP] leaderboard insert exception:", e);
+      channel.send({ type: "broadcast", event: "name_result", payload: {
+        controllerId: cid, runId, success: false, message: "Teknisk feil. Prøv igjen."
+      }});
+    }
   });
 
   channel.on("broadcast", { event: "join_request" }, ({ payload }) => {
@@ -793,6 +1046,7 @@ async function connectSupabase() {
       connDot.className = "conn-dot on";
       connLabel.textContent = "TILKOBLET";
       sendState();
+      loadLeaderboard();
     } else if (status === "CHANNEL_ERROR") {
       connDot.className = "conn-dot off";
       connLabel.textContent = "FEIL";
@@ -812,6 +1066,7 @@ function sendState() {
   channel.send({ type: "broadcast", event: "state", payload: { phase, progress, timeLeft, taps, activePlayer } });
 }
 
+renderLeaderboards(); // paint empty 10 slots immediately so the panel never flashes empty
 connectSupabase();
 
 // =====================================================================
@@ -880,6 +1135,16 @@ function endGame() {
   finalProgress = Math.min(1, progress);
   finalTaps = taps;
   const won = finalProgress >= 1;
+  const elapsedMs = Date.now() - gameStartTime;
+  const completionTimeMs = won ? Math.min(Math.max(0, elapsedMs), GAME_DURATION * 1000) : null;
+  currentRun = {
+    completed: won,
+    completion_time_ms: completionTimeMs,
+    distance_percent: finalProgress,
+    energy_used: finalTaps,
+    controllerId: activePlayer,
+    runId: "run-" + Date.now() + "-" + Math.random().toString(36).substr(2, 6),
+  };
 
   if (won) {
     showCelebration();
@@ -928,6 +1193,14 @@ function goIntro() {
   hideCelebration();
   document.getElementById("countdown-overlay").classList.add("hidden");
   showScreen("intro");
+  // Drop any unsubmitted qualification and refresh the board for the next player
+  if (pendingQualification) {
+    console.log("[DISP] dropping unsubmitted qualification on return to intro");
+    pendingQualification = null;
+  }
+  currentRun = null;
+  renderLeaderboards();
+  loadLeaderboard();
   sendState();
 }
 
@@ -1270,6 +1543,40 @@ function showResults(){
 
   const sw = document.getElementById("statsWrap");
   sw.innerHTML = statHTML("Distanse kjørt", distKm, "km", won) + statHTML("Energiforbruk", energyDisplay, "kWh/km", false) + statHTML("Tid brukt", timeSec, "sek", false);
+
+  // Make sure the leaderboard panel next to the stats is up to date
+  renderLeaderboards();
+
+  // Decide qualification — display is the authority. Only prompt remote controllers;
+  // "local" keyboard/mouse play is excluded from the leaderboard.
+  evaluateAndPromptQualification();
+}
+
+function evaluateAndPromptQualification() {
+  pendingQualification = null;
+  if (!currentRun) return;
+  if (!currentRun.controllerId || currentRun.controllerId === "local") return;
+
+  const rank = evaluateQualification(currentRun, leaderboard);
+  if (!rank) {
+    console.log("[DISP] run did not qualify for top 10");
+    return;
+  }
+  pendingQualification = {
+    run: currentRun,
+    rank,
+    controllerId: currentRun.controllerId,
+    runId: currentRun.runId,
+  };
+  console.log("[DISP] run qualifies at rank", rank, "— sending qualify_prompt");
+  if (channel) {
+    channel.send({ type: "broadcast", event: "qualify_prompt", payload: {
+      controllerId: currentRun.controllerId,
+      runId: currentRun.runId,
+      rank,
+      completed: currentRun.completed,
+    }});
+  }
 }
 
 function statHTML(label, value, unit, hl){
