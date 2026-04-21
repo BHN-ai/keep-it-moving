@@ -756,21 +756,39 @@ async function connectSupabase() {
   });
 
   channel.on("broadcast", { event: "tap" }, ({ payload }) => {
-    if (phase === "game" && activePlayer && payload && payload.playerId !== activePlayer) return;
+    const cid = payload && payload.controllerId;
+    console.log("[DISP] tap received from:", cid);
+    if (!cid || (activePlayer && cid !== activePlayer)) {
+      console.log("[DISP] tap ignored (not owner). current owner:", activePlayer);
+      return;
+    }
+    if (!activePlayer) activePlayer = cid; // legacy fallback: accept first tap as claim
+    console.log("[DISP] tap accepted from:", cid);
+    clearTimeout(lockTimeout);
+    lockTimeout = setTimeout(unlockGame, LOCK_TIMEOUT_MS);
     handleTap();
   });
 
-  channel.on("broadcast", { event: "claim" }, ({ payload }) => {
-    if (phase === "intro" && !activePlayer && payload && payload.playerId) {
-      activePlayer = payload.playerId;
+  channel.on("broadcast", { event: "join_request" }, ({ payload }) => {
+    const cid = payload && payload.controllerId;
+    if (!cid) return;
+    console.log("[DISP] join_request received:", cid, "phase:", phase, "currentOwner:", activePlayer);
+    let accepted = false;
+    if (!activePlayer || activePlayer === cid) {
+      activePlayer = cid;
       clearTimeout(lockTimeout);
       lockTimeout = setTimeout(unlockGame, LOCK_TIMEOUT_MS);
-      startCountdown();
+      accepted = true;
+      console.log("[DISP] owner assigned:", cid);
+    } else {
+      console.log("[DISP] owner rejected:", cid, "— already owned by", activePlayer);
     }
+    channel.send({ type: "broadcast", event: "join_response", payload: { controllerId: cid, accepted } });
+    sendState();
   });
 
   channel.subscribe((status, err) => {
-    console.log("Display channel status:", status, err);
+    console.log("[DISP] channel status:", status, err || "");
     if (status === "SUBSCRIBED") {
       connDot.className = "conn-dot on";
       connLabel.textContent = "TILKOBLET";
@@ -778,7 +796,7 @@ async function connectSupabase() {
     } else if (status === "CHANNEL_ERROR") {
       connDot.className = "conn-dot off";
       connLabel.textContent = "FEIL";
-      console.error("Channel error:", err);
+      console.error("[DISP] Channel error:", err);
     } else if (status === "TIMED_OUT") {
       connDot.className = "conn-dot off";
       connLabel.textContent = "TIDSAVBRUDD";
@@ -846,6 +864,7 @@ function startGame() {
 }
 
 function unlockGame() {
+  console.log("[DISP] owner cleared (unlockGame). previous owner:", activePlayer);
   activePlayer = null;
   clearTimeout(lockTimeout);
   if (phase !== "intro") {
@@ -856,7 +875,8 @@ function unlockGame() {
 
 function endGame() {
   clearInterval(timerInterval);
-  clearTimeout(lockTimeout);
+  // Keep lockTimeout running through results so ownership auto-clears
+  // if the active controller disappears during the results screen.
   finalProgress = Math.min(1, progress);
   finalTaps = taps;
   const won = finalProgress >= 1;
@@ -873,7 +893,14 @@ function endGame() {
 }
 
 function handleTap() {
-  if (phase === "intro") { startCountdown(); activePlayer = "local"; clearTimeout(lockTimeout); lockTimeout = setTimeout(unlockGame, LOCK_TIMEOUT_MS); sendState(); return; }
+  if (phase === "intro") {
+    if (!activePlayer) activePlayer = "local"; // preserve remote owner if one is set
+    startCountdown();
+    clearTimeout(lockTimeout);
+    lockTimeout = setTimeout(unlockGame, LOCK_TIMEOUT_MS);
+    sendState();
+    return;
+  }
   if (phase === "results") { goIntro(); return; }
   if (phase === "countdown") return;
   if (phase !== "game" || timeLeft <= 0 || progress >= 1) return;
@@ -891,6 +918,7 @@ function handleTap() {
 }
 
 function goIntro() {
+  console.log("[DISP] owner cleared (goIntro). previous owner:", activePlayer);
   phase = "intro";
   activePlayer = null;
   clearTimeout(lockTimeout);

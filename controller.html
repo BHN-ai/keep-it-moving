@@ -224,6 +224,27 @@ const progPct = document.getElementById("progPct");
 const progTaps = document.getElementById("progTaps");
 const lockedMsg = document.getElementById("lockedMsg");
 
+// =====================================================================
+// SESSION / IDENTITY — declared FIRST so any later code can safely use them.
+// The previous version referenced SESSION_ID before its const-declaration,
+// triggering a ReferenceError (TDZ) and halting the whole script — which is
+// why the controller was stuck on "Kobler til skjermen...".
+// =====================================================================
+const urlParams = new URLSearchParams(window.location.search);
+const SESSION_ID = urlParams.get("s") || "default";
+const CHANNEL_NAME = "kim-" + SESSION_ID;
+
+// Persistent per-session controllerId so reloads preserve ownership.
+const STORAGE_KEY = "kim_controllerId_" + SESSION_ID;
+let controllerId = null;
+try { controllerId = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+if (!controllerId) {
+  controllerId = "ctrl-" + Math.random().toString(36).substr(2, 9);
+  try { localStorage.setItem(STORAGE_KEY, controllerId); } catch (e) {}
+}
+
+console.log("[CTRL] startup", { controllerId, SESSION_ID, CHANNEL_NAME });
+
 // Show session info
 document.getElementById("sessionLabel").textContent = SESSION_ID === "default" ? "ingen sesjon" : "sesjon " + SESSION_ID;
 
@@ -238,12 +259,7 @@ let connected = false;
 let gamePhase = "intro";
 let channel = null;
 let isActivePlayer = false;
-const myPlayerId = "ctrl-" + Math.random().toString(36).substr(2, 9);
-
-// Read session ID from URL parameter ?s=
-const urlParams = new URLSearchParams(window.location.search);
-const SESSION_ID = urlParams.get("s") || "default";
-const CHANNEL_NAME = "kim-" + SESSION_ID;
+let lastJoinRequestAt = 0;
 
 // =====================================================================
 // SUPABASE REALTIME
@@ -251,85 +267,111 @@ const CHANNEL_NAME = "kim-" + SESSION_ID;
 const SUPABASE_URL = "https://axqnrakxsegitwrgvshu.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4cW5yYWt4c2VnaXR3cmd2c2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTM5MzEsImV4cCI6MjA5MTEyOTkzMX0.wpCrYzKmnSA2G6TAs1w1SKxyhsJ51NkbOirYM85uRhU";
 
+function sendJoinRequest() {
+  if (!channel || !connected) return;
+  const now = Date.now();
+  if (now - lastJoinRequestAt < 500) return; // debounce
+  lastJoinRequestAt = now;
+  channel.send({ type: "broadcast", event: "join_request", payload: { controllerId } });
+  console.log("[CTRL] join_request sent", controllerId);
+}
+
 async function connectSupabase() {
-  // Debug: show what we're connecting to
+  if (SESSION_ID === "default") return;
+
   statusPhase.textContent = "Kobler til: " + CHANNEL_NAME;
 
-  // Check if Supabase library loaded
   if (typeof supabase === "undefined" || !supabase.createClient) {
     statusPhase.textContent = "Feil: Supabase-bibliotek ikke lastet";
     connLabel.textContent = "FEIL";
-    console.error("Supabase JS library not loaded");
+    console.error("[CTRL] Supabase JS library not loaded");
     return;
   }
 
   try {
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
-    realtime: {
-      params: {
-        eventsPerSecond: 10
+      realtime: { params: { eventsPerSecond: 10 } }
+    });
+
+    channel = sb.channel(CHANNEL_NAME, {
+      config: { broadcast: { self: false } },
+    });
+
+    channel.on("broadcast", { event: "state" }, ({ payload }) => {
+      gamePhase = payload.phase;
+      const wasOwner = isActivePlayer;
+
+      if (payload.activePlayer === controllerId) {
+        isActivePlayer = true;
+      } else {
+        if (wasOwner) console.log("[CTRL] owner cleared (no longer me)");
+        isActivePlayer = false;
       }
-    }
-  });
 
-  channel = sb.channel(CHANNEL_NAME, {
-    config: { broadcast: { self: false } },
-  });
+      // If display reports no active owner and we're in intro, try to claim.
+      if (!payload.activePlayer && gamePhase === "intro" && connected) {
+        sendJoinRequest();
+      }
 
-  channel.on("broadcast", { event: "state" }, ({ payload }) => {
-    gamePhase = payload.phase;
-
-    if (payload.activePlayer) {
-      isActivePlayer = (payload.activePlayer === myPlayerId);
-    } else {
-      isActivePlayer = false;
-    }
-
-    updateUI();
-
-    if (isActivePlayer && payload.phase === "game") {
-      const pct = Math.round(payload.progress * 100);
-      progressFill.style.width = pct + "%";
-      progPct.textContent = pct + "%";
-      progTaps.textContent = payload.taps + " trykk";
-    }
-  });
-
-  channel.subscribe((status, err) => {
-    console.log("Channel status:", status, err);
-    statusPhase.textContent = "Status: " + status;
-    if (status === "SUBSCRIBED") {
-      connected = true;
-      connDot.className = "conn-dot on";
-      connLabel.textContent = "TILKOBLET";
-      statusPhase.textContent = "Trykk for \u00e5 starte";
       updateUI();
-    } else if (status === "CHANNEL_ERROR") {
-      connected = false;
-      connDot.className = "conn-dot off";
-      connLabel.textContent = "FEIL";
-      statusPhase.textContent = "Tilkoblingsfeil: " + (err || "ukjent");
-      console.error("Channel error:", err);
-    } else if (status === "TIMED_OUT") {
-      connected = false;
-      connDot.className = "conn-dot off";
-      connLabel.textContent = "TIDSAVBRUDD";
-      statusPhase.textContent = "Tidsavbrudd — last siden p\u00e5 nytt";
-    } else if (status === "CLOSED") {
-      connected = false;
-      connDot.className = "conn-dot off";
-      connLabel.textContent = "LUKKET";
-      statusPhase.textContent = "Tilkobling lukket";
-    } else {
-      connDot.className = "conn-dot off";
-      connLabel.textContent = status;
-    }
-  });
-  } catch(e) {
+
+      if (isActivePlayer && payload.phase === "game") {
+        const pct = Math.round(payload.progress * 100);
+        progressFill.style.width = pct + "%";
+        progPct.textContent = pct + "%";
+        progTaps.textContent = payload.taps + " trykk";
+      }
+    });
+
+    channel.on("broadcast", { event: "join_response" }, ({ payload }) => {
+      if (!payload || payload.controllerId !== controllerId) return;
+      console.log("[CTRL] join_response received", payload);
+      if (payload.accepted) {
+        console.log("[CTRL] owner assigned");
+        isActivePlayer = true;
+        lockedMsg.style.display = "none";
+      } else {
+        console.log("[CTRL] owner rejected");
+        isActivePlayer = false;
+      }
+      updateUI();
+    });
+
+    channel.subscribe((status, err) => {
+      console.log("[CTRL] channel status:", status, err || "");
+      if (status === "SUBSCRIBED") {
+        connected = true;
+        connDot.className = "conn-dot on";
+        connLabel.textContent = "TILKOBLET";
+        statusPhase.textContent = "Venter på tilgang...";
+        sendJoinRequest();
+        updateUI();
+      } else if (status === "CHANNEL_ERROR") {
+        connected = false;
+        connDot.className = "conn-dot off";
+        connLabel.textContent = "FEIL";
+        statusPhase.textContent = "Tilkoblingsfeil: " + (err || "ukjent");
+        console.error("[CTRL] channel error", err);
+      } else if (status === "TIMED_OUT") {
+        connected = false;
+        connDot.className = "conn-dot off";
+        connLabel.textContent = "TIDSAVBRUDD";
+        statusPhase.textContent = "Tidsavbrudd — last siden på nytt";
+      } else if (status === "CLOSED") {
+        connected = false;
+        connDot.className = "conn-dot off";
+        connLabel.textContent = "LUKKET";
+        statusPhase.textContent = "Tilkobling lukket";
+      } else {
+        connDot.className = "conn-dot off";
+        connLabel.textContent = status;
+      }
+    });
+  } catch (e) {
     statusPhase.textContent = "Feil: " + e.message;
     connLabel.textContent = "FEIL";
-    console.error("connectSupabase error:", e);
+    console.error("[CTRL] connectSupabase error:", e);
   }
 }
 
@@ -361,17 +403,21 @@ function updateUI() {
 
   switch (gamePhase) {
     case "intro":
-      isActivePlayer = false;
       tapBtn.classList.remove("disabled");
-      tapLabel.textContent = "Start";
-      statusPhase.textContent = "Trykk for \u00e5 starte";
+      if (isActivePlayer) {
+        tapLabel.textContent = "Start";
+        statusPhase.textContent = "Trykk for å starte";
+      } else {
+        tapLabel.textContent = "Venter";
+        statusPhase.textContent = "Venter på tilgang...";
+      }
       gameProgress.style.visibility = "hidden";
       break;
     case "countdown":
       if (isActivePlayer) {
         tapBtn.classList.add("disabled");
         tapLabel.textContent = "Klar...";
-        statusPhase.textContent = "Se p\u00e5 skjermen!";
+        statusPhase.textContent = "Se på skjermen!";
         gameProgress.style.visibility = "hidden";
       }
       break;
@@ -387,12 +433,12 @@ function updateUI() {
       if (isActivePlayer) {
         tapBtn.classList.remove("disabled");
         tapLabel.textContent = "Igjen";
-        statusPhase.textContent = "Trykk for \u00e5 spille igjen";
+        statusPhase.textContent = "Trykk for å spille igjen";
         gameProgress.style.visibility = "hidden";
       } else {
         tapBtn.classList.remove("disabled");
-        tapLabel.textContent = "Start";
-        statusPhase.textContent = "Trykk for \u00e5 starte";
+        tapLabel.textContent = "Venter";
+        statusPhase.textContent = "Venter på neste runde";
         gameProgress.style.visibility = "hidden";
         lockedMsg.style.display = "none";
       }
@@ -407,16 +453,15 @@ function sendTap() {
   if (!connected || !channel) return;
   if (tapBtn.classList.contains("disabled")) return;
 
-  if (gamePhase === "intro" && !isActivePlayer) {
-    isActivePlayer = true;
-    channel.send({ type: "broadcast", event: "claim", payload: { playerId: myPlayerId } });
-    tapBtn.classList.add("disabled");
-    tapLabel.textContent = "Klar...";
-    statusPhase.textContent = "Se p\u00e5 skjermen!";
+  // If we aren't the owner, don't send a tap — request ownership instead.
+  if (!isActivePlayer) {
+    console.log("[CTRL] tap blocked — not owner. Requesting ownership.");
+    sendJoinRequest();
     return;
   }
 
-  channel.send({ type: "broadcast", event: "tap", payload: { playerId: myPlayerId } });
+  channel.send({ type: "broadcast", event: "tap", payload: { controllerId } });
+  console.log("[CTRL] tap sent");
 
   pulseRing.classList.remove("animate");
   void pulseRing.offsetWidth;
