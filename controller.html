@@ -252,8 +252,17 @@ async function connectSupabase() {
   // Debug: show what we're connecting to
   statusPhase.textContent = "Kobler til: " + CHANNEL_NAME;
 
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  // Check if Supabase library loaded
+  if (typeof supabase === "undefined" || !supabase.createClient) {
+    statusPhase.textContent = "Feil: Supabase-bibliotek ikke lastet";
+    connLabel.textContent = "FEIL";
+    console.error("Supabase JS library not loaded");
+    return;
+  }
+
+  try {
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
     realtime: {
       params: {
         eventsPerSecond: 10
@@ -314,9 +323,19 @@ async function connectSupabase() {
       connLabel.textContent = status;
     }
   });
+  } catch(e) {
+    statusPhase.textContent = "Feil: " + e.message;
+    connLabel.textContent = "FEIL";
+    console.error("connectSupabase error:", e);
+  }
 }
 
-connectSupabase();
+// Ensure Supabase library is loaded before connecting
+if (document.readyState === "complete") {
+  connectSupabase();
+} else {
+  window.addEventListener("load", connectSupabase);
+}
 
 // =====================================================================
 // UI STATE
