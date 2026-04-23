@@ -212,6 +212,140 @@
     0% { background: rgba(0, 255, 185, 0.25); }
     100% { background: transparent; }
   }
+
+  /* ============ INTRO REDESIGN ============ */
+  /* Background image is hosted in Supabase Storage (public bucket: "assets").
+     Swap images by replacing bg-intro.jpg in that bucket — no code change needed.
+     Fallback: if the image fails to load, background-color keeps the screen dark. */
+  #intro {
+    background-color: var(--bg);
+    background-image: url('https://axqnrakxsegitwrgvshu.supabase.co/storage/v1/object/public/assets/bg-intro.jpg');
+    background-size: cover;
+    background-position: center right;
+    background-repeat: no-repeat;
+  }
+  /* Subtle dark fade so left-side text stays readable over any background */
+  #intro::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 40, 0.72) 0%, rgba(0, 0, 40, 0.35) 45%, rgba(0, 0, 40, 0) 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .intro-logo {
+    position: absolute;
+    top: 40px; left: 56px;
+    z-index: 10;
+  }
+  .intro-logo svg {
+    height: 40px;
+    display: block;
+    opacity: 0.98;
+  }
+
+  .intro-main {
+    position: absolute;
+    left: 56px;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 680px;
+    z-index: 8;
+    display: flex; flex-direction: column;
+  }
+  .intro-main h1 {
+    font-size: clamp(56px, 6.6vw, 92px);
+    font-weight: 300;
+    letter-spacing: -2.5px;
+    line-height: 1;
+    color: var(--white);
+    text-align: left;
+  }
+  .intro-main h1 span {
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: 0 0 60px rgba(0, 255, 185, 0.25);
+  }
+  .intro-main .title-accent {
+    width: 72px; height: 2px;
+    background: var(--accent);
+    margin: 20px 0 22px;
+    border-radius: 1px;
+    box-shadow: 0 0 12px rgba(0, 255, 185, 0.4);
+  }
+  .intro-main .sub {
+    font-size: clamp(17px, 1.55vw, 22px);
+    color: var(--white);
+    opacity: 0.78;
+    line-height: 1.55;
+    max-width: 500px;
+    text-align: left;
+    margin-bottom: 48px;
+  }
+
+  .qr-card {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding: 26px;
+    background: rgba(0, 10, 48, 0.55);
+    border: 1px solid rgba(0, 255, 185, 0.16);
+    border-radius: 18px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    max-width: 540px;
+  }
+  /* Green glow line underneath the QR card */
+  .qr-card::after {
+    content: "";
+    position: absolute;
+    bottom: -6px; left: 18%; right: 18%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    filter: blur(3px);
+    opacity: 0.85;
+  }
+  .qr-card canvas {
+    width: 220px; height: 220px;
+    border-radius: 12px;
+    display: block;
+    flex-shrink: 0;
+    background: #000028;
+  }
+  .qr-card-info {
+    display: flex; flex-direction: column;
+    gap: 14px;
+  }
+  .qr-card-info .phone-icon {
+    width: 38px; height: 38px;
+    stroke: var(--accent);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .qr-card-info .qr-label-big {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 2.4px;
+    text-transform: uppercase;
+    font-family: var(--mono);
+    line-height: 1.25;
+  }
+  .qr-card-info .qr-card-hint {
+    font-size: 11.5px;
+    font-family: var(--mono);
+    color: var(--white);
+    opacity: 0.45;
+    letter-spacing: 0.6px;
+    line-height: 1.5;
+  }
+
+  /* Make sure the leaderboard panel floats above the gradient overlay */
+  #intro .lb-panel.pinned { z-index: 8; }
 </style>
 </head>
 <body>
@@ -230,27 +364,31 @@
 
 <!-- ============ INTRO ============ -->
 <div class="screen" id="intro">
-  <div class="brand-line h1"></div>
-  <div class="brand-line h2"></div>
-  <div class="brand-line v1"></div>
-  <div class="brand-line v2"></div>
-  <div class="center-col fade-in">
-    <div style="margin-bottom:40px">
-      <svg class="sie-logo-large" viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537L3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001 222.616,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001 361.247,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001 585.411,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001 724.271,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537L886.047,152.537z"/></g></svg>
-    </div>
+  <!-- Siemens logo pinned top-left -->
+  <div class="intro-logo fade-in">
+    <svg viewBox="0 0 1000 159" xmlns="http://www.w3.org/2000/svg"><g><path fill="#FFFFFF" d="M3.086,152.537V122.46c17.119,5.388,32.267,8.082,45.444,8.082c18.193,0,27.291-4.809,27.291-14.42c0-3.583-1.324-6.594-3.978-9.032c-2.714-2.586-9.665-6.171-20.835-10.764c-20.042-8.241-33.111-15.269-39.19-21.082C3.939,67.571,0,57.895,0,46.202C0,31.144,5.74,19.667,17.212,11.78C28.557,3.962,43.33,0.057,61.554,0.057c10.041,0,24.574,1.848,43.583,5.549v28.933c-14.144-5.65-27.273-8.469-39.403-8.469c-17.081,0-25.621,4.69-25.621,14.091c0,3.514,1.72,6.38,5.165,8.602c2.865,1.798,10.759,5.596,23.665,11.406c18.583,8.253,30.954,15.427,37.118,21.529c7.314,7.238,10.978,16.604,10.978,28.084c0,16.501-7.177,29.088-21.521,37.761c-11.621,7.033-26.69,10.535-45.198,10.535C34.69,158.078,18.942,156.237,3.086,152.537L3.086,152.537z"/><polygon fill="#FFFFFF" points="141.063,2.704 141.063,2.704 183.603,2.704 183.603,155.001 141.063,155.001"/><polygon fill="#FFFFFF" points="222.616,155.001 222.616,2.704 331.721,2.704 331.721,30.25 263.616,30.25 263.616,64.639 322.898,64.639 322.898,89.765 263.616,89.765 263.616,125.906 333.476,125.906 333.476,155.001 222.616,155.001"/><polygon fill="#FFFFFF" points="361.247,155.001 361.247,2.704 416.402,2.704 454.721,100.015 494.001,2.704 546.39,2.704 546.39,155.001 506.056,155.001 506.056,47.171 461.392,156.547 435.023,156.547 391.219,47.171 391.219,155.001 361.247,155.001"/><polygon fill="#FFFFFF" points="585.411,155.001 585.411,2.704 694.514,2.704 694.514,30.25 626.415,30.25 626.415,64.639 685.695,64.639 685.695,89.765 626.415,89.765 626.415,125.906 696.28,125.906 696.28,155.001 585.411,155.001"/><polygon fill="#FFFFFF" points="724.271,155.001 724.271,2.704 773.575,2.704 825.883,104.655 825.883,2.704 855.847,2.704 855.847,155.001 807.943,155.001 754.247,51.678 754.247,155.001 724.271,155.001"/><path fill="#FFFFFF" d="M886.047,152.537V122.46c16.974,5.388,32.12,8.082,45.452,8.082c18.195,0,27.282-4.809,27.282-14.42c0-3.583-1.289-6.594-3.854-9.032c-2.728-2.586-9.708-6.171-20.945-10.764c-19.982-8.173-33.064-15.198-39.199-21.082c-7.875-7.605-11.807-17.317-11.807-29.146c0-14.993,5.726-26.432,17.21-34.319c11.328-7.818,26.118-11.723,44.344-11.723c10.247,0,23.525,1.627,39.81,4.896l3.761,0.653v28.933c-14.146-5.65-27.313-8.469-39.508-8.469c-17.016,0-25.503,4.69-25.503,14.091c0,3.514,1.711,6.38,5.147,8.602c2.73,1.729,10.656,5.529,23.778,11.406c18.442,8.253,30.787,15.427,37.005,21.529c7.325,7.238,10.98,16.604,10.98,28.084c0,16.501-7.135,29.088-21.406,37.761c-11.689,7.033-26.796,10.535-45.301,10.535C917.646,158.078,901.891,156.237,886.047,152.537L886.047,152.537z"/></g></svg>
+  </div>
+
+  <!-- Main content (left side) -->
+  <div class="intro-main fade-in">
     <h1>Keep It <span>Moving</span></h1>
+    <div class="title-accent"></div>
     <p class="sub">Trykk for å kjøre toget fremover.<br>Nå destinasjonen før tiden renner ut.</p>
-    <div style="margin-top:48px" class="qr-wrap">
-      <canvas id="qrIntro" width="360" height="360" style="width:360px;height:360px;border-radius:14px;background:#000028"></canvas>
-      <span class="qr-label">Skann for å spille</span>
-    </div>
-    <div style="position:absolute;bottom:36px;display:flex;flex-direction:column;align-items:center;gap:6px">
-      <div style="width:24px;height:40px;border-radius:12px;border:1.5px solid var(--dim);display:flex;align-items:flex-start;justify-content:center;padding-top:8px">
-        <div style="width:3px;height:6px;border-radius:2px;background:var(--accent);animation:scrollDot 1.8s ease-in-out infinite"></div>
+
+    <div class="qr-card">
+      <canvas id="qrIntro" width="360" height="360"></canvas>
+      <div class="qr-card-info">
+        <svg class="phone-icon" viewBox="0 0 24 24">
+          <rect x="6" y="2.5" width="12" height="19" rx="2.5" ry="2.5"/>
+          <line x1="10" y1="5.5" x2="14" y2="5.5"/>
+          <circle cx="12" cy="18.5" r="0.8" fill="currentColor" stroke="none"/>
+        </svg>
+        <div class="qr-label-big">Skann for<br>å spille</div>
+        <div class="qr-card-hint">trykk eller bruk<br>mellomrom</div>
       </div>
-      <span class="hint-text">trykk eller bruk mellomrom</span>
     </div>
   </div>
+
   <!-- Leaderboard panel (intro) -->
   <div class="lb-panel pinned" id="introLeaderboard">
     <div class="lb-title">Topp 10 bedrifter <span class="lb-subtitle">Keep It Moving</span></div>
