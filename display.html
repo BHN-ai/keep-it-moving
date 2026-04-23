@@ -248,16 +248,18 @@
   .intro-main {
     position: absolute;
     left: 56px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 120px;            /* clears the top-left logo */
+    bottom: 48px;          /* keeps the QR card off the bottom edge */
     max-width: 680px;
     z-index: 8;
-    display: flex; flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;   /* vertically center within this box */
   }
   .intro-main h1 {
-    font-size: clamp(56px, 6.6vw, 92px);
+    font-size: clamp(48px, min(6.4vw, 9vh), 84px);
     font-weight: 300;
-    letter-spacing: -2.5px;
+    letter-spacing: -2px;
     line-height: 1;
     color: var(--white);
     text-align: left;
@@ -268,20 +270,20 @@
     text-shadow: 0 0 60px rgba(0, 255, 185, 0.25);
   }
   .intro-main .title-accent {
-    width: 72px; height: 2px;
+    width: 64px; height: 2px;
     background: var(--accent);
-    margin: 20px 0 22px;
+    margin: 18px 0 18px;
     border-radius: 1px;
     box-shadow: 0 0 12px rgba(0, 255, 185, 0.4);
   }
   .intro-main .sub {
-    font-size: clamp(17px, 1.55vw, 22px);
+    font-size: clamp(15px, min(1.55vw, 2.2vh), 20px);
     color: var(--white);
     opacity: 0.78;
-    line-height: 1.55;
+    line-height: 1.5;
     max-width: 500px;
     text-align: left;
-    margin-bottom: 48px;
+    margin-bottom: 32px;
   }
 
   .qr-card {
@@ -308,7 +310,8 @@
     opacity: 0.85;
   }
   .qr-card canvas {
-    width: 220px; height: 220px;
+    width: clamp(160px, 22vh, 220px);
+    height: clamp(160px, 22vh, 220px);
     border-radius: 12px;
     display: block;
     flex-shrink: 0;
