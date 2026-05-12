@@ -990,15 +990,16 @@ function validateCompanyName(raw) {
 }
 
 // Ranking comparator. Returns <0 if a ranks higher (better) than b.
+// Scoring rule: completion time is the only score. Tiebreaker: earliest created_at wins.
 function compareRuns(a, b) {
   if (a.completed && !b.completed) return -1;
   if (!a.completed && b.completed) return 1;
   if (a.completed && b.completed) {
     if (a.completion_time_ms !== b.completion_time_ms) return a.completion_time_ms - b.completion_time_ms;
-    return a.energy_used - b.energy_used;
+    return (a.created_at || "").localeCompare(b.created_at || "");
   }
   if (a.distance_percent !== b.distance_percent) return b.distance_percent - a.distance_percent;
-  return a.energy_used - b.energy_used;
+  return (a.created_at || "").localeCompare(b.created_at || "");
 }
 
 // Determine what rank a new run would take against the current top-10 snapshot.
@@ -1021,7 +1022,7 @@ async function loadLeaderboard() {
       .order("completed", { ascending: false })
       .order("completion_time_ms", { ascending: true, nullsFirst: false })
       .order("distance_percent", { ascending: false })
-      .order("energy_used", { ascending: true })
+      .order("created_at", { ascending: true })
       .limit(10);
     if (error) {
       console.error("[DISP] leaderboard fetch error:", error);
@@ -1276,13 +1277,14 @@ function endGame() {
   finalProgress = Math.min(1, progress);
   finalTaps = taps;
   const won = finalProgress >= 1;
-  const elapsedMs = Date.now() - gameStartTime;
-  const completionTimeMs = won ? Math.min(Math.max(0, elapsedMs), GAME_DURATION * 1000) : null;
+  const elapsedMs = Math.min(Math.max(0, Date.now() - gameStartTime), GAME_DURATION * 1000);
+  const completionTimeMs = won ? elapsedMs : null;
   currentRun = {
     completed: won,
     completion_time_ms: completionTimeMs,
+    elapsed_ms: elapsedMs,                  // captured here so results screen is not skewed by the 2.8s celebration delay
     distance_percent: finalProgress,
-    energy_used: finalTaps,
+    energy_used: finalTaps,                 // still persisted to the DB for historical/analytics, no longer shown or ranked on
     controllerId: activePlayer,
     runId: "run-" + Date.now() + "-" + Math.random().toString(36).substr(2, 6),
   };
@@ -1659,13 +1661,10 @@ function showResults(){
 
   const won = finalProgress >= 1;
   const distKm = Math.round(finalProgress * 130);
-  const elapsed = Math.round((Date.now() - gameStartTime) / 1000);
-  const timeSec = Math.min(elapsed, GAME_DURATION);
-
-  // Energy efficiency: taps per km — lower is better, more meaningful variation
-  // If no distance covered, show 0
-  const energyPerKm = distKm > 0 ? (finalTaps / distKm * 10) : 0;
-  const energyDisplay = energyPerKm > 0 ? energyPerKm.toFixed(1) : "—";
+  // Use the elapsed time captured in endGame() — Date.now() here would be skewed by
+  // the celebration delay before showResults runs. Format matches the leaderboard (X.XX).
+  const elapsedMsForDisplay = currentRun ? currentRun.elapsed_ms : Math.min(Date.now() - gameStartTime, GAME_DURATION * 1000);
+  const timeSec = (elapsedMsForDisplay / 1000).toFixed(2);
 
   document.getElementById("glowBg").classList.toggle("hidden", !won);
 
@@ -1683,7 +1682,9 @@ function showResults(){
   document.getElementById("resultSub").textContent = won ? "Hamar — Oslo fullført" : `${distKm} av 130 km tilbakelagt`; // city names match canvas labels
 
   const sw = document.getElementById("statsWrap");
-  sw.innerHTML = statHTML("Distanse kjørt", distKm, "km", won) + statHTML("Energiforbruk", energyDisplay, "kWh/km", false) + statHTML("Tid brukt", timeSec, "sek", false);
+  // Time is the score — highlight it on a completed run. On an incomplete run, distance
+  // is the meaningful number, so highlight that instead.
+  sw.innerHTML = statHTML("Distanse kjørt", distKm, "km", !won) + statHTML("Tid brukt", timeSec, "sek", won);
 
   // Make sure the leaderboard panel next to the stats is up to date
   renderLeaderboards();

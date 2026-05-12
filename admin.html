@@ -275,7 +275,6 @@
           <th>Fullført</th>
           <th>Tid</th>
           <th>Distanse</th>
-          <th>Trykk</th>
           <th>Lagret</th>
           <th>Notat</th>
           <th style="text-align:right">Handling</th>
@@ -434,7 +433,6 @@ function renderTable() {
       <td>${completedBadge}</td>
       <td class="mono">${formatTime(e.completion_time_ms)}</td>
       <td class="mono">${formatDist(e.distance_percent)}</td>
-      <td class="mono">${e.energy_used}</td>
       <td class="dim mono">${escapeHtml(formatDate(e.created_at))}</td>
       <td class="note" title="${escapeHtml(e.moderation_note || '')}">${escapeHtml(e.moderation_note || '')}</td>
       <td class="actions">${actionBtn}</td>
