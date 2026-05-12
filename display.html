@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keep It Moving — Siemens</title>
+<title>Jakten på Sekundet — Siemens</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -374,7 +374,7 @@
 
   <!-- Main content (left side) -->
   <div class="intro-main fade-in">
-    <h1>Keep It <span>Moving</span></h1>
+    <h1>Jakten på <span>Sekundet</span></h1>
     <div class="title-accent"></div>
     <p class="sub">Trykk for å kjøre toget fremover.<br>Nå destinasjonen før tiden renner ut.</p>
 
@@ -394,14 +394,14 @@
 
   <!-- Leaderboard panel (intro) -->
   <div class="lb-panel pinned" id="introLeaderboard">
-    <div class="lb-title">Topp 10 bedrifter <span class="lb-subtitle">Keep It Moving</span></div>
+    <div class="lb-title">Topp 10 bedrifter <span class="lb-subtitle">Jakten på Sekundet</span></div>
     <div class="lb-list" id="introLbList"></div>
   </div>
 </div>
 <div class="screen hidden" id="game">
   <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
   <div class="game-hud">
-    <div class="title">Keep It <span>Moving</span></div>
+    <div class="title">Jakten på <span>Sekundet</span></div>
     <span id="pctText" style="font-size:18px;font-family:var(--mono);color:var(--white);opacity:0.5">0%</span>
   </div>
   <div style="text-align:center;padding:12px 0 0">
@@ -889,7 +889,7 @@
   </div>
   <!-- Leaderboard panel (results) -->
   <div class="lb-panel results-pinned" id="resultsLeaderboard">
-    <div class="lb-title">Topp 10 bedrifter <span class="lb-subtitle">Keep It Moving</span></div>
+    <div class="lb-title">Topp 10 bedrifter <span class="lb-subtitle">Jakten på Sekundet</span></div>
     <div class="lb-list" id="resultsLbList"></div>
   </div>
   <div class="brand-bar" style="justify-content:center">
@@ -1537,8 +1537,8 @@ function startRailCanvas() {
     const oa=prog<0.15?0.5:0.2;
     ctx.fillStyle=C.dim+"30"; ctx.beginPath(); ctx.roundRect(rL-2,rY-16,4,32,2); ctx.fill();
 
-    // City labels above skylines
-    ctx.fillStyle="rgba(234,242,248,0.35)"; ctx.font=`500 16px ${mono}`; ctx.textAlign="center";
+    // City labels above skylines — pure white, 50% larger for readability from a distance
+    ctx.fillStyle="#eaf2f8"; ctx.font=`600 24px ${mono}`; ctx.textAlign="center";
     ctx.fillText("Hamar", rL + rLen*0.1, rY - H*0.28);
     ctx.fillText("Oslo", rR - rLen*0.08, rY - H*0.28);
 
@@ -1680,7 +1680,7 @@ function showResults(){
 
   document.getElementById("resultTitle").className = "result-title " + (won ? "won" : "lost");
   document.getElementById("resultTitle").textContent = won ? "Toget er fremme!" : "Nesten fremme!";
-  document.getElementById("resultSub").textContent = won ? "Hamar — Oslo fullført" : `${distKm} av 130 km tilbakelagt`;
+  document.getElementById("resultSub").textContent = won ? "Hamar — Oslo fullført" : `${distKm} av 130 km tilbakelagt`; // city names match canvas labels
 
   const sw = document.getElementById("statsWrap");
   sw.innerHTML = statHTML("Distanse kjørt", distKm, "km", won) + statHTML("Energiforbruk", energyDisplay, "kWh/km", false) + statHTML("Tid brukt", timeSec, "sek", false);

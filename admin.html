@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Jakten på Sekundet — Moderering</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1d242d;
+    --border: #262d36;
+    --text: #e6edf3;
+    --mid: #8b98a8;
+    --dim: #5a6471;
+    --accent: #3aa0ff;
+    --accent-dim: rgba(58, 160, 255, 0.12);
+    --ok: #3fb950;
+    --warn: #f0a020;
+    --danger: #f85149;
+    --danger-bg: rgba(248, 81, 73, 0.1);
+    --mono: 'SF Mono', Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  html, body {
+    width: 100%; min-height: 100%;
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* ========== PIN GATE ========== */
+  #gate {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  #gate[hidden] { display: none; }
+  #gate form {
+    width: 100%; max-width: 360px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  #gate h1 {
+    font-size: 20px; font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  #gate .sub {
+    font-size: 13px; color: var(--mid);
+    margin-top: -8px;
+  }
+  #gate label {
+    font-size: 12px; color: var(--mid);
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  #gate input {
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: var(--mono);
+    outline: none;
+    letter-spacing: 2px;
+  }
+  #gate input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  #gate button {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    border: none; border-radius: 6px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+  }
+  #gate button:disabled { opacity: 0.5; cursor: default; }
+  #gateError {
+    font-size: 13px; color: var(--danger);
+    min-height: 18px;
+    font-family: var(--mono);
+  }
+
+  /* ========== DASHBOARD ========== */
+  #dashboard { padding: 24px 28px 64px; max-width: 1200px; margin: 0 auto; }
+  #dashboard[hidden] { display: none; }
+
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .top-bar h1 {
+    font-size: 20px; font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .top-bar h1 .tag {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--dim);
+    margin-left: 10px;
+    letter-spacing: 2px; text-transform: uppercase;
+    font-weight: 400;
+  }
+  .top-bar .actions { display: flex; gap: 8px; }
+
+  button.btn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+  }
+  button.btn:hover:not(:disabled) { background: var(--panel-2); }
+  button.btn:disabled { opacity: 0.5; cursor: default; }
+  button.btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  button.btn.primary:hover:not(:disabled) { filter: brightness(1.1); }
+  button.btn.danger { background: var(--danger-bg); color: var(--danger); border-color: rgba(248, 81, 73, 0.3); }
+  button.btn.danger:hover:not(:disabled) { background: rgba(248, 81, 73, 0.18); }
+
+  .statusbar {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 14px;
+    font-family: var(--mono);
+    font-size: 12px; color: var(--mid);
+  }
+  .statusbar .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .statusbar .pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--dim);
+  }
+  .statusbar .pill.ok .dot { background: var(--ok); }
+  .statusbar #msg { color: var(--mid); flex: 1; }
+  .statusbar #msg.ok { color: var(--ok); }
+  .statusbar #msg.err { color: var(--danger); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  thead th {
+    background: var(--panel-2);
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--mid);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.is-hidden td { opacity: 0.55; }
+  tbody tr.is-hidden td .name { text-decoration: line-through; }
+  tbody td.mono { font-family: var(--mono); color: var(--text); }
+  tbody td.name { font-weight: 500; }
+  tbody td.dim { color: var(--mid); }
+  tbody td.note {
+    max-width: 240px;
+    color: var(--warn);
+    font-size: 12px;
+    font-family: var(--mono);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  tbody td.actions { white-space: nowrap; text-align: right; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  .badge.visible {
+    background: rgba(63, 185, 80, 0.15);
+    color: var(--ok);
+  }
+  .badge.hidden {
+    background: rgba(248, 81, 73, 0.15);
+    color: var(--danger);
+  }
+  .badge.completed {
+    background: rgba(58, 160, 255, 0.15);
+    color: var(--accent);
+  }
+  .badge.incomplete {
+    background: var(--panel-2);
+    color: var(--mid);
+    border: 1px solid var(--border);
+  }
+
+  .empty-state {
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--mid);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ PIN GATE ============ -->
+<div id="gate">
+  <form id="gateForm">
+    <h1>Moderering</h1>
+    <div class="sub">Intern tilgang. Denne siden er ikke lenket fra spillet.</div>
+    <label for="pinInput">Moderator-PIN</label>
+    <input id="pinInput" type="password" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="text" required />
+    <div id="gateError"></div>
+    <button id="gateBtn" type="submit">Lås opp</button>
+  </form>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard" hidden>
+  <div class="top-bar">
+    <h1>Toppliste <span class="tag">Jakten på Sekundet · Moderering</span></h1>
+    <div class="actions">
+      <button class="btn" id="refreshBtn">Oppdater</button>
+      <button class="btn danger" id="clearBtn">Tøm toppliste</button>
+      <button class="btn" id="logoutBtn">Logg ut</button>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span class="pill ok"><span class="dot"></span><span id="countLabel">0 oppføringer</span></span>
+    <span id="msg"></span>
+  </div>
+
+  <div id="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Bedrift</th>
+          <th>Status</th>
+          <th>Fullført</th>
+          <th>Tid</th>
+          <th>Distanse</th>
+          <th>Trykk</th>
+          <th>Lagret</th>
+          <th>Notat</th>
+          <th style="text-align:right">Handling</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" hidden>Ingen oppføringer ennå.</div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// SUPABASE (anon key — same as display/controller).
+// Moderation privileges come exclusively from PIN-gated RPC functions.
+// =====================================================================
+const SUPABASE_URL = "https://axqnrakxsegitwrgvshu.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4cW5yYWt4c2VnaXR3cmd2c2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTM5MzEsImV4cCI6MjA5MTEyOTkzMX0.wpCrYzKmnSA2G6TAs1w1SKxyhsJ51NkbOirYM85uRhU";
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// PIN stays only in-memory for the session. Not persisted.
+let pin = null;
+let entries = [];
+
+const gate        = document.getElementById("gate");
+const gateForm    = document.getElementById("gateForm");
+const pinInput    = document.getElementById("pinInput");
+const gateError   = document.getElementById("gateError");
+const gateBtn     = document.getElementById("gateBtn");
+const dashboard   = document.getElementById("dashboard");
+const rowsEl      = document.getElementById("rows");
+const emptyState  = document.getElementById("emptyState");
+const msgEl       = document.getElementById("msg");
+const countLabel  = document.getElementById("countLabel");
+
+function setMsg(text, kind) {
+  msgEl.textContent = text || "";
+  msgEl.className = kind || "";
+}
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[<&>"']/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+function formatTime(ms) {
+  if (ms === null || ms === undefined) return "—";
+  return (ms / 1000).toFixed(2) + "s";
+}
+
+function formatDist(pct) {
+  if (pct === null || pct === undefined) return "—";
+  return Math.round(Number(pct) * 100) + "%";
+}
+
+function formatDate(iso) {
+  try {
+    return new Date(iso).toLocaleString("nb-NO", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit"
+    });
+  } catch { return iso || ""; }
+}
+
+// =====================================================================
+// PIN GATE
+// =====================================================================
+function showDashboard() {
+  gate.hidden = true;
+  gate.style.display = "none";        // bulletproof: beats any CSS rule
+  dashboard.hidden = false;
+  dashboard.style.display = "block";
+}
+
+function showGate() {
+  dashboard.hidden = true;
+  dashboard.style.display = "none";
+  gate.hidden = false;
+  gate.style.display = "";            // revert to CSS default (flex)
+}
+
+gateForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  console.log("[ADMIN] submit fired");
+  gateError.textContent = "";
+  const attempt = pinInput.value.trim();
+  if (!attempt) return;
+  gateBtn.disabled = true;
+  gateBtn.textContent = "Låser opp...";
+  try {
+    const { data, error } = await sb.rpc("moderate_list", { input_pin: attempt });
+    console.log("[ADMIN] RPC returned:", { hasError: !!error, rows: (data||[]).length });
+    if (error) {
+      if (error.message && /invalid pin/i.test(error.message)) {
+        gateError.textContent = "Feil PIN.";
+      } else {
+        gateError.textContent = "Feil: " + error.message;
+      }
+      return;
+    }
+    pin = attempt;
+    entries = data || [];
+    pinInput.value = "";
+    showDashboard();
+    renderTable();
+    console.log("[ADMIN] dashboard shown");
+  } catch (err) {
+    console.error("[ADMIN] unlock threw:", err);
+    gateError.textContent = "Nettverksfeil: " + err.message;
+  } finally {
+    gateBtn.disabled = false;
+    gateBtn.textContent = "Lås opp";
+  }
+});
+
+// =====================================================================
+// LOAD + RENDER
+// =====================================================================
+async function refresh() {
+  if (!pin) return;
+  setMsg("Laster...", "");
+  const { data, error } = await sb.rpc("moderate_list", { input_pin: pin });
+  if (error) {
+    setMsg("Kunne ikke laste: " + error.message, "err");
+    return;
+  }
+  entries = data || [];
+  renderTable();
+  setMsg("Oppdatert " + new Date().toLocaleTimeString("nb-NO"), "ok");
+}
+
+function renderTable() {
+  countLabel.textContent = entries.length + " oppføring" + (entries.length === 1 ? "" : "er");
+
+  if (!entries.length) {
+    rowsEl.innerHTML = "";
+    emptyState.hidden = false;
+    return;
+  }
+  emptyState.hidden = true;
+
+  const html = entries.map((e, i) => {
+    const statusBadge = e.is_hidden
+      ? '<span class="badge hidden">Skjult</span>'
+      : '<span class="badge visible">Synlig</span>';
+    const completedBadge = e.completed
+      ? '<span class="badge completed">Ja</span>'
+      : '<span class="badge incomplete">Nei</span>';
+    const actionBtn = e.is_hidden
+      ? `<button class="btn" data-act="restore" data-id="${e.id}">Gjenopprett</button>`
+      : `<button class="btn danger" data-act="hide" data-id="${e.id}">Skjul</button>`;
+    return `<tr class="${e.is_hidden ? 'is-hidden' : ''}">
+      <td class="dim mono">${i + 1}</td>
+      <td class="name"><span class="name">${escapeHtml(e.company_name)}</span></td>
+      <td>${statusBadge}</td>
+      <td>${completedBadge}</td>
+      <td class="mono">${formatTime(e.completion_time_ms)}</td>
+      <td class="mono">${formatDist(e.distance_percent)}</td>
+      <td class="mono">${e.energy_used}</td>
+      <td class="dim mono">${escapeHtml(formatDate(e.created_at))}</td>
+      <td class="note" title="${escapeHtml(e.moderation_note || '')}">${escapeHtml(e.moderation_note || '')}</td>
+      <td class="actions">${actionBtn}</td>
+    </tr>`;
+  }).join("");
+
+  rowsEl.innerHTML = html;
+
+  rowsEl.querySelectorAll("button[data-act]").forEach(btn => {
+    btn.addEventListener("click", () => onModerateClick(btn));
+  });
+}
+
+// =====================================================================
+// HIDE / RESTORE
+// =====================================================================
+async function onModerateClick(btn) {
+  const id = btn.dataset.id;
+  const act = btn.dataset.act;
+  const hide = (act === "hide");
+
+  let note = null;
+  if (hide) {
+    const input = prompt("Skriv et kort modereringsnotat (valgfritt):");
+    if (input === null) return; // cancel
+    note = input.trim() || null;
+  }
+
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = "Lagrer...";
+  try {
+    const { error } = await sb.rpc("moderate_set_hidden", {
+      target_id: id,
+      hidden: hide,
+      note: note,
+      input_pin: pin,
+    });
+    if (error) {
+      setMsg("Feil: " + error.message, "err");
+      btn.disabled = false;
+      btn.textContent = original;
+      return;
+    }
+    setMsg(hide ? "Oppføring skjult." : "Oppføring gjenopprettet.", "ok");
+    await refresh();
+  } catch (err) {
+    setMsg("Nettverksfeil: " + err.message, "err");
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+// =====================================================================
+// CLEAR ALL
+// =====================================================================
+document.getElementById("clearBtn").addEventListener("click", async () => {
+  const typed = prompt('Skriv "TØM" for å bekrefte at du vil slette hele topplisten (dette kan ikke angres):');
+  if (typed !== "TØM") {
+    setMsg("Avbrutt.", "");
+    return;
+  }
+  setMsg("Tømmer topplisten...", "");
+  const { data, error } = await sb.rpc("moderate_clear_all", { input_pin: pin });
+  if (error) {
+    setMsg("Feil: " + error.message, "err");
+    return;
+  }
+  setMsg("Slettet " + (data || 0) + " oppføringer.", "ok");
+  await refresh();
+});
+
+document.getElementById("refreshBtn").addEventListener("click", refresh);
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  pin = null;
+  entries = [];
+  rowsEl.innerHTML = "";
+  showGate();
+  setMsg("", "");
+  setTimeout(() => pinInput.focus(), 40);
+});
+
+// Auto-focus the PIN input on load
+setTimeout(() => pinInput.focus(), 40);
+</script>
+</body>
+</html>
