@@ -1682,9 +1682,9 @@ function showResults(){
   document.getElementById("resultSub").textContent = won ? "Hamar — Oslo fullført" : `${distKm} av 130 km tilbakelagt`; // city names match canvas labels
 
   const sw = document.getElementById("statsWrap");
-  // Time is the score — highlight it on a completed run. On an incomplete run, distance
-  // is the meaningful number, so highlight that instead.
-  sw.innerHTML = statHTML("Distanse kjørt", distKm, "km", !won) + statHTML("Tid brukt", timeSec, "sek", won);
+  // Completion time is the only stat the client wants on the results screen.
+  // (distKm is still computed above — it's used in resultSub for incomplete runs.)
+  sw.innerHTML = statHTML("Tid brukt", timeSec, "sek", true);
 
   // Make sure the leaderboard panel next to the stats is up to date
   renderLeaderboards();
